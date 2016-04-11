@@ -39,6 +39,12 @@ def error(text):
 def success(text):
 	print (const.START_GREEN + "Success: " + text + const.END_GREEN)
 
+def warning(text):
+	print (const.START_YELLOW + text + const.END_YELLOW)
+
+def gtext(text):
+	print (const.START_GREY + text + const.END_GREY)
+
 # Random Functions
 def random_pktid(length):
    return ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') for i in range(length))
@@ -88,10 +94,10 @@ def create_socket_client(myHost, port):
 	    break
 	return s
 
-def forward(pk, addr, listNeighbor):
+def forward(pk, addr, sn_network):
 	if pk != bytes(const.ERROR_PKT, "ascii"):
-		if not [pk[20:75], pk[75:80]] in listNeighbor:
-			for x in listNeighbor:
+		if not [pk[20:75], pk[75:80]] in sn_network:
+			for x in sn_network:
 				if addr != x[0]:
 					s = func.create_socket_client(func.roll_the_dice(x[0]), x[1])
 					if not(s is None):
@@ -147,11 +153,18 @@ def clear_pktid(list_pkt):
 		pkTime = i[1]
 		nowtime = time.time() * 1000
 		diff = nowtime - pkTime
-		if diff >= 300000:
+		if diff >= const.MAX_TIME:
 			del i
 	return list_pkt
 
 def check_query(pktid, list_pkt):
+	list_pkt = clear_pktid(list_pkt)
+	for lista in list_pkt:
+		if pktid == lista[0]:
+			return True
+	return False
+
+def check_sn(pktid, list_pkt):
 	list_pkt = clear_pktid(list_pkt)
 	for lista in list_pkt:
 		if pktid == lista[0]:
@@ -250,3 +263,10 @@ def download(selectFile):
 			except:
 				print("Apertura non riuscita")
 
+
+####### USERS
+def countUserFile(sessionID, listFiles):
+	i = 0
+	for f in listFiles:
+		if f[2] is sessionID:
+			i += 1

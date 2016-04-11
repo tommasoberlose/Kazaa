@@ -5,15 +5,11 @@ import Daemon as daemon
 import os
 import sys
 
-def update_network():
-	func.error("Errore, funzione da fare... idioti")
-
 def login(host, SN_host):
-	s = func.create_socket_client(func.roll_the_dice(SN_host[0], SN_host[1]))
+	s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1])
 	pk = pack.login(host)
 	if s is None:
 		func.error("Errore nell'apertura della socket per il login")
-		break
 	else:
 		s.sendall(pk)
 		ricevutoByte = s.recv(const.LENGTH_PACK)
@@ -21,28 +17,24 @@ def login(host, SN_host):
 		s.close()
 		return sessionID
 
-def update_network(host, sn_network):
+def update_network(host, sn_network, listPkt):
 	del sn_network[:]
-	pk = pack.neighbor(myHost)
+	pk = pack.request_sn(host)
+	func.add_pktid(pk[4:20], listPkt)
 	while True:
-		print ("\n>>> CREAZIONE RETE SN")
 		nGroup = input("Numero del gruppo: ")
 		if nGroup is 0:
 			break
 		nElement = input("Numero dell'elemento del gruppo: ")
 		if nElement is 0:
 			break
-		nPort = input("Inserire la porta su cui il vicino è in ascolto: ")
-		if nPort is 0:
-			break
 		hostN = func.roll_the_dice("172.030." + func.format_string(nGroup, const.LENGTH_SECTION_IPV4, "0") + 
 																"." + func.format_string(nElement, const.LENGTH_SECTION_IPV4, "0") + 
 																"|fc00:0000:0000:0000:0000:0000:" + func.format_string(nGroup, const.LENGTH_SECTION_IPV6, "0") + 
 																":" + func.format_string(nElement, const.LENGTH_SECTION_IPV6, "0"))
-		s = func.create_socket_client(hostN, nPort);
+		s = func.create_socket_client(hostN, const.PORT_SN);
 		if s is None:
-			func.error("Errore nella scelta del primo peer vicino, scegline un altro.")
-			break
+			func.error("Errore nella scelta del primo super nodo vicino, scegline un altro.")
 		else:
 			s.sendall(pk)
 			s.close()
@@ -65,11 +57,9 @@ def add_file(fileName, sessionID):
 		s = func.create_socket_client(SN_host[0], SN_host[1]);
 		if s is None:
 			func.error("Errore, super nodo non attivo.")
-			break
 		else:
 			s.sendall(pk)
 			s.close()
-			break
 	else:
 		func.error("Errore: file non esistente.")
 
@@ -81,11 +71,9 @@ def remove_file(fileName, sessionID):
 		s = func.create_socket_client(SN_host[0], SN_host[1]);
 		if s is None:
 			func.error("Errore, super nodo non attivo.")
-			break
 		else:
 			s.sendall(pk)
 			s.close()
-			break
 	else:
 		func.error("Errore: file non esistente.")
 	
@@ -119,12 +107,17 @@ def logout(ip, sessionID, SN_host):
 SN = False
 if (len(sys.argv) > 1) and (sys.argv[1] == "-sn"):
 	SN = True
+	func.warning("\nP2P >> INIZIALIZZAZIONE COME SUPER NODO")
+else:
+	func.warning("\nP2P >> INIZIALIZZAZIONE COME PEER")
 
 sessionID = ""
 SN_host = []
 
 sn_network = []
-listPkt = []
+listPkt = [] # [pktid, time]
+listUsers = [] # [ip, port, sessionID]
+listFiles = [] # [md5, fileName, sessionID]
 
 ####### INIZIALIZZAZIONE
 
@@ -144,19 +137,20 @@ host = ("172.030." + func.format_string(nGroup, const.LENGTH_SECTION_IPV4, "0") 
 				"|fc00:0000:0000:0000:0000:0000:" + func.format_string(nGroup, const.LENGTH_SECTION_IPV6, "0") + 
 				":" + func.format_string(nElement, const.LENGTH_SECTION_IPV6, "0"))
 
-print ("IP:", host)
+func.gtext("IP: " + host)
 
 ####### DEMONE
 
-daemonThread = daemon.Daemon(host, SN, listPkt)
+daemonThread = daemon.Daemon(host, SN, sn_network, listPkt, listUsers, listFiles)
 daemonThread.setName("DAEMON")
-daemonThread.start()	
+#daemonThread.start()	
 
 ####### INIZIALIZZAZIONE SN del PEER
 
 if SN:
 	SN_host = [host, const.PORT_SN]
 else:
+	func.warning("\nP2P >> CHOOSE SN")
 	SN_nGroup = input("Inserire il numero del super nodo: ")
 	SN_nElement = input("Inserire il numero dell'elemento del super nodo: ")
 	SN_host = [("172.030." + func.format_string(SN_nGroup, const.LENGTH_SECTION_IPV4, "0") + 
@@ -164,44 +158,66 @@ else:
 				"|fc00:0000:0000:0000:0000:0000:" + func.format_string(SN_nGroup, const.LENGTH_SECTION_IPV6, "0") + 
 				":" + func.format_string(SN_nElement, const.LENGTH_SECTION_IPV6, "0")), const.PORT_SN]
 
+func.gtext("SN HOST: " + host)
+
 ####### UPDATE NETWORK SN
 
 if SN:
-	update_network(host, sn_network)
+	func.warning("\nP2P >> CREATION SN NETWORK: ")
+	update_network(host, sn_network, listPkt)
 
 ####### LOGIN AUTOMATICO PEER
 
+func.warning("\nP2P >> PEER LOGIN:")
 sessionID = login(host, SN_host)
+if sessionID is not const.ERROR_LOG:
+	func.success("Session ID: " + sessionID)
 
-# MENU
+	# MENU
 
-while True:
-	choice = input("\n\nScegli azione PEER:\nadd\t - Add File\nremove\t - Remove File\nsearch\t - Search File\nquit\t - Quit\n\n")
+	while True:
+		print ("\n\nScegli azione SN:\nuser\t - View Users\nfile\t - View Files")
+		print ("\n\nScegli azione PEER:\nadd\t - Add File\nremove\t - Remove File\nsearch\t - Search File\nquit\t - Quit\n\n")
+		choice = input()
 
-	elif (choice == "add" or choice == "a"):
-		print ("\n>>> ADD FILE")
-		fileName = input("Quale file vuoi inserire?")
-		if fileName is not "0":
-			add_file(fileName, sessionID)
+		if (choice == "add" or choice == "a"):
+			func.warning("\n>>> ADD FILE")
+			fileName = input("Quale file vuoi inserire?")
+			if fileName is not "0":
+				add_file(fileName, sessionID)
 
-	elif (choice == "remove" or choice == "r"):
-		print ("\n>>> REMOVE FILE")
-		fileName = input("Quale file vuoi rimuovere?")
-		if fileName is not "0":
-			remove_file(fileName, sessionID)
+		elif (choice == "remove" or choice == "r"):
+			func.warning("\n>>> REMOVE FILE")
+			fileName = input("Quale file vuoi rimuovere?")
+			if fileName is not "0":
+				remove_file(fileName, sessionID)
 
-	elif (choice == "search" or choice == "s"):
-		print ("\n>>> SEARCH")
-		query = input("\nInserisci il nome del file da cercare: ")
-		while(len(query) > const.LENGTH_QUERY):
-			func.error("Siamo spiacenti ma accettiamo massimo 20 caratteri.")
+		elif (choice == "user" or choice == "u"):
+			func.warning("\n>>> USER LIST")
+			print ("USER IP\t\t\tSESSIONID")
+			for user in listUsers:
+				print(user[0] + " " + user[1] + "\t" + user[2] + "\t" + func.countUserFile(user[2], listFiles))
+
+		elif (choice == "file" or choice == "f"):
+			func.warning("\n>>> FILES LIST")
+			print ("MD5\tFILENAME\tSESSIONID")
+			for file in listFiles:
+				print(file[0] + "\t" + file[1].strip() + "\t" + file[2])
+
+		elif (choice == "search" or choice == "s"):
+			func.warning("\n>>> SEARCH")
 			query = input("\nInserisci il nome del file da cercare: ")
-		search(sessionID, query, SN_host)
+			while(len(query) > const.LENGTH_QUERY):
+				func.error("Siamo spiacenti ma accettiamo massimo 20 caratteri.")
+				query = input("\nInserisci il nome del file da cercare: ")
+			search(sessionID, query, SN_host)
 
-	elif (choice == "quit" or choice == "q"):
-		logout(host, sessionID, SN_host)
-		daemonThread.join()
-		break
+		elif (choice == "quit" or choice == "q"):
+			logout(host, sessionID, SN_host)
+			daemonThread.join()
+			break
 
-	else:
-		func.error("Wrong Choice!")
+		else:
+			func.error("Wrong Choice!")
+else:
+	func.error("Errore Login")
