@@ -3,38 +3,29 @@ import Constant as const
 import Package as pack
 import Daemon as daemon
 import os
+import sys
 
-def updateNeighbor(myHost, listNeighbor):
-	del listNeighbor[:]
+def update_network():
+	func.error("Errore, funzione da fare... idioti")
+
+def login(host, SN_host):
+	s = func.create_socket_client(func.roll_the_dice(SN_host[0], SN_host[1]))
+	pk = pack.login(host)
+	if s is None:
+		func.error("Errore nell'apertura della socket per il login")
+		break
+	else:
+		s.sendall(pk)
+		ricevutoByte = s.recv(const.LENGTH_PACK)
+		sessionID = ricevutoByte[4:20]
+		s.close()
+		return sessionID
+
+def update_network(host, sn_network):
+	del sn_network[:]
 	pk = pack.neighbor(myHost)
-	# Se avevo già dei vicini vado a testare se sono ancora attivi
-	"""if len(listNeighbor) != 0:
-		for neighbor in listNeighbor:
-			s = func.create_socket_client(func.roll_the_dice(neighbor[0]), neighbor[1]);
-			# Se non sono più attivi lo segnalo e li cancello dalla lista
-			if s is None:
-				func.error(str(neighbor[0], "ascii") + " non è più attivo.")
-				del neighbor
-			else:
-				func.success(str(neighbor[0], "ascii") + " ancora attivo.")
-				s.close()
-		# Se prima ero al completo e sono ancora tutti attivi lo segnalo e esco
-		if len(listNeighbor) == const.NUM_NEIGHBOR:
-			func.success("Lista vicini completa!")
-		# Se invece dopo il controllo ho meno vicini del numero massimo mando a ogni vicino una richiesta di vicinato
-		elif len(listNeighbor) > 0:
-			for neighbor in listNeighbor:
-				s = func.create_socket_client(func.roll_the_dice(neighbor[0]), neighbor[1]);
-				if s is None:
-					func.error("Mamma che sfiga, sto vicino è andato giù proprio ora.")
-				else:
-					s.sendall(pk)
-					s.close()	
-	
-	# Alla fine gestisco la possibilità che tutti i vicini che avevo siano andati giù e quindi passo all'inserimento manuale.
-	if len(listNeighbor) == 0: 		"""
 	while True:
-		print ("\n>>> SCELTA PEER VICINO")
+		print ("\n>>> CREAZIONE RETE SN")
 		nGroup = input("Numero del gruppo: ")
 		if nGroup is 0:
 			break
@@ -57,131 +48,97 @@ def updateNeighbor(myHost, listNeighbor):
 			s.close()
 			break
 
-def search(myHost, query, listNeighbor, listPkt):
-	pk = pack.query(myHost, query)
-	if len(listNeighbor) is 0:
-		func.error("Nessun vicino presente, crea prima una rete virtuale")
+def search(sessionID, query, SN_host):
+	pk = pack.request_search(sessionID, query)
+	s = func.create_socket_client(func.roll_the_dice(x[0]), x[1]);
+	if s is None:
+		func.error("Super nodo non attivo.")
 	else:
-		func.add_pktid(pk[4:20], listPkt)
-		i = 0
-		for x in listNeighbor:
-			s = func.create_socket_client(func.roll_the_dice(x[0]), x[1]);
-			if s is None:
-				func.error("Peer non attivo: " + str(x[0], "ascii"))
-			else:
-				func.success("Peer attivo: " + str(x[0], "ascii"))
-				s.sendall(pk)
-				s.close()
-				i = i + 1
-		if i is 0:
-			func.error("Nessun peer vicino attivo")
+		s.sendall(pk)
+		s.close()
+
+# Funzione di aggiunta file
+def add_file(fileName, sessionID):
+	if os.path.exists("FileCondivisi/" + nomeFile):
+		md5File = hashlib.md5(open(("FileCondivisi/" + nomeFile),'rb').read()).hexdigest()
+		pk = pack.request_add_file(sessionID, md5, func.format_string(fileName, const.LENGTH_FILENAME, " "))
+		s = func.create_socket_client(SN_host[0], SN_host[1]);
+		if s is None:
+			func.error("Errore, super nodo non attivo.")
+			break
 		else:
-			print("\nScegli file da quelli disponibili (0 per uscire): \n")
-			print("ID\tFILE\t\tIP\n")
-			f = False
-			while not f:
-				try:
-					print("\n")
-					choose = int(input())
-					if choose != 0:
-						if choose <= len(listResultQuery):
-							f = True
-							func.remove_pktid(pk, listPkt)
-							download(listResultQuery[choose - 1])
-							del listResultQuery[:]
-						else: 
-							func.error("Spiacente, numero inserito non valido.")
-					else:
-						break
-				except ValueError:
-					func.error("Spiacente, inserisci un numero.")
+			s.sendall(pk)
+			s.close()
+			break
+	else:
+		func.error("Errore: file non esistente.")
 
-			func.remove_pktid(pk, listPkt)
-			del listResultQuery[:]
-
+# Funzione di rimozione del file
+def remove_file(fileName, sessionID):
+	if os.path.exists("FileCondivisi/" + nomeFile):
+		md5File = hashlib.md5(open(("FileCondivisi/" + nomeFile),'rb').read()).hexdigest()
+		pk = pack.request_remove_file(sessionID, md5)
+		s = func.create_socket_client(SN_host[0], SN_host[1]);
+		if s is None:
+			func.error("Errore, super nodo non attivo.")
+			break
+		else:
+			s.sendall(pk)
+			s.close()
+			break
+	else:
+		func.error("Errore: file non esistente.")
 	
 
-# Funzione di download
-def download(selectFile):	
-	print ("\n>>> DOWNLOAD")
-
-	md5 = selectFile[1]
-	nomeFile = selectFile[2].decode("ascii").strip()
-	ip = selectFile[3]
-	port = selectFile[4]
-
-	# Con probabilità 0.5 invio su IPv4, else IPv6
-	ip = func.roll_the_dice(ip.decode("ascii"))
-	print("Connessione con:", ip)
-
-	# Mi connetto al peer
-
-	sP = func.create_socket_client(ip, port)
-	if sP is None:
-	    print ('Error: could not open socket in download')
-	else:
-		pk = pack.dl(md5)
-		sP.sendall(pk)
-
-		nChunk = int(sP.recv(const.LENGTH_HEADER)[4:10])
-					
-		ricevutoByte = b''
-
-		i = 0
-		
-		while i != nChunk:
-			ricevutoLen = sP.recv(const.LENGTH_NCHUNK)
-			while (len(ricevutoLen) < const.LENGTH_NCHUNK):
-				ricevutoLen = ricevutoLen + sP.recv(const.LENGTH_NCHUNK - len(ricevutoLen))
-			buff = sP.recv(int(ricevutoLen))
-			while(len(buff) < int(ricevutoLen)):
-				buff = buff + sP.recv(int(ricevutoLen) - len(buff))
-			ricevutoByte = ricevutoByte + buff
-			i = i + 1
-
-		sP.close()
-		
-		# Salvare il file data
-		open((const.FILE_COND + nomeFile),'wb').write(ricevutoByte)
-		print("File scaricato correttamente, apertura in corso...")
-		try:
-			os.system("open " + const.FILE_COND + nomeFile)
-		except:
-			try:
-				os.system("start " + const.FILE_COND + nomeFile)
-			except:
-				print("Apertura non riuscita")
-
-def logout(ip):
+def logout(ip, sessionID, SN_host):
 	print ("\n>>> LOGOUT")
-	i = 0
-	pk = pack.logout()
-	s = func.create_socket_client(func.get_ipv4(ip), const.PORT);
+	pk = pack.request_logout(sessionID)
+	s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1]);
 	if s is None:
-		func.error("Errore nella chiusura del demone:" + func.get_ipv4(ip))
+		func.error("Errore nel logout dal super nodo")
+	else:
+		s.sendall(pk)
+		ricevutoByte = s.recv(const.LENGTH_PACK)
+		nDelete = ricevutoByte[4:]
+		func.success("Logout eseguito con successo dal super nodo, eliminati " + str(nDelete, "ascii") + "elementi")
+		s.close()
+
+	pk = pack.close()
+	s = func.create_socket_client(func.roll_the_dice(ip), const.PORT);
+	if s is None:
+		func.error("Errore nella chiusura del demone")
 	else:
 		s.sendall(pk)
 		s.close()
-		i = i + 1
-	s = func.create_socket_client(func.get_ipv6(ip), const.PORT);
-	if s is None:
-		func.error("Errore nella chiusura del demone:" + func.get_ipv6(ip))
-	else:
-		s.sendall(pk)
-		s.close()
-		i = i + 1
-	if i is 2:
-		print ("Logout eseguito con successo.")
+		print ("Chiusura del programma eseguito con successo, arrivederci.\n\n")
+
+
 
 ####### VARIABILI 
 
-listNeighbor = []	
-listPkt = []
-listResultQuery = []
+SN = False
+if (len(sys.argv) > 1) and (sys.argv[1] == "-sn"):
+	SN = True
 
-####### INIZIO CLIENT #######
-nGroup = input("Inserire il numero del gruppo: ")
-nElement = input("Inserire il numero dell'elemento del gruppo: ")
+sessionID = ""
+SN_host = []
+
+sn_network = []
+listPkt = []
+
+####### INIZIALIZZAZIONE
+
+if len(sys.argv) > 2:
+	if SN:
+		nGroup = sys.argv[2]
+		nElement = sys.argv[3]
+	else:
+		nGroup = sys.argv[1]
+		nElement = sys.argv[2]
+else:
+	nGroup = input("Inserire il numero del gruppo: ")
+	nElement = input("Inserire il numero dell'elemento del gruppo: ")
+
 host = ("172.030." + func.format_string(nGroup, const.LENGTH_SECTION_IPV4, "0") + 
 				"." + func.format_string(nElement, const.LENGTH_SECTION_IPV4, "0") + 
 				"|fc00:0000:0000:0000:0000:0000:" + func.format_string(nGroup, const.LENGTH_SECTION_IPV6, "0") + 
@@ -189,45 +146,61 @@ host = ("172.030." + func.format_string(nGroup, const.LENGTH_SECTION_IPV4, "0") 
 
 print ("IP:", host)
 
-####### DEMONI
+####### DEMONE
 
-daemonThreadv4 = daemon.Daemon(func.get_ipv4(host), listNeighbor, listPkt, listResultQuery, host)
-daemonThreadv6 = daemon.Daemon(func.get_ipv6(host), listNeighbor, listPkt, listResultQuery, host)
-daemonThreadv4.setName("DAEMON IPV4")
-daemonThreadv6.setName("DAEMON IPV6")
-daemonThreadv4.start()	
-daemonThreadv6.start()
+daemonThread = daemon.Daemon(host, SN, listPkt)
+daemonThread.setName("DAEMON")
+daemonThread.start()	
 
-# Menù di interazione
+####### INIZIALIZZAZIONE SN del PEER
+
+if SN:
+	SN_host = [host, const.PORT_SN]
+else:
+	SN_nGroup = input("Inserire il numero del super nodo: ")
+	SN_nElement = input("Inserire il numero dell'elemento del super nodo: ")
+	SN_host = [("172.030." + func.format_string(SN_nGroup, const.LENGTH_SECTION_IPV4, "0") + 
+				"." + func.format_string(SN_nElement, const.LENGTH_SECTION_IPV4, "0") + 
+				"|fc00:0000:0000:0000:0000:0000:" + func.format_string(SN_nGroup, const.LENGTH_SECTION_IPV6, "0") + 
+				":" + func.format_string(SN_nElement, const.LENGTH_SECTION_IPV6, "0")), const.PORT_SN]
+
+####### UPDATE NETWORK SN
+
+if SN:
+	update_network(host, sn_network)
+
+####### LOGIN AUTOMATICO PEER
+
+sessionID = login(host, SN_host)
+
+# MENU
+
 while True:
-	choice = input("\n\nScegli azione:\nupdate\t - Update Neighborhood\ndelete\t - Delete Neighborhood\nview\t - View Neighborhood\nsearch\t - Search File\nquit\t - Quit\n\n")
+	choice = input("\n\nScegli azione PEER:\nadd\t - Add File\nremove\t - Remove File\nsearch\t - Search File\nquit\t - Quit\n\n")
 
-	if (choice == "update" or choice == "u"):
-		updateNeighbor(host, listNeighbor)
+	elif (choice == "add" or choice == "a"):
+		print ("\n>>> ADD FILE")
+		fileName = input("Quale file vuoi inserire?")
+		if fileName is not "0":
+			add_file(fileName, sessionID)
 
-	elif (choice == "delete" or choice == "d"):
-		del listNeighbor[:]
-
-	elif (choice == "view" or choice == "v"):
-		print ("\n>>> VIEW NEIGHBORHOOD")
-		if len(listNeighbor) != 0:
-			for n in listNeighbor:
-				print(str(n[0], "ascii") + "\t" + str(n[1], "ascii"))
-		else:
-			print("Nessun vicino salvato")
+	elif (choice == "remove" or choice == "r"):
+		print ("\n>>> REMOVE FILE")
+		fileName = input("Quale file vuoi rimuovere?")
+		if fileName is not "0":
+			remove_file(fileName, sessionID)
 
 	elif (choice == "search" or choice == "s"):
-		print ("\n>>> RICERCA")
+		print ("\n>>> SEARCH")
 		query = input("\nInserisci il nome del file da cercare: ")
 		while(len(query) > const.LENGTH_QUERY):
 			func.error("Siamo spiacenti ma accettiamo massimo 20 caratteri.")
 			query = input("\nInserisci il nome del file da cercare: ")
-		search(host, query, listNeighbor, listPkt)
+		search(sessionID, query, SN_host)
 
 	elif (choice == "quit" or choice == "q"):
-		logout(host)
-		daemonThreadv4.join()
-		daemonThreadv6.join()
+		logout(host, sessionID, SN_host)
+		daemonThread.join()
 		break
 
 	else:
