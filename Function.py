@@ -270,3 +270,9 @@ def countUserFile(sessionID, listFiles):
 	for f in listFiles:
 		if f[2] is sessionID:
 			i += 1
+
+def isUserLogged(sessionID, listUsers):
+	for user in listUsers:
+		if sessionID is user[2]:
+			return True
+	return False
