@@ -26,7 +26,6 @@ def forward_sn(pack):
 		return bytes(const.ERROR_PKT, "ascii")
 
 # PKT LOGIN
-
 def request_login():
 	port = func.format_string(const.PORT, const.LENGTH_PORT, "0")
 	pack = bytes(const.CODE_LOGIN, "ascii") + bytes(ip, "ascii") + bytes(port, "ascii") 
