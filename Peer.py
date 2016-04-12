@@ -34,7 +34,7 @@ def update_network(host, listPkt):
 
 		pk = pack.request_sn(host)
 		func.add_pktid(pk[4:20], listPkt)
-		s = func.create_socket_client(Fhost, const.PORT);
+		s = func.create_socket_client(func.roll_the_dice(Fhost[0]), Fhost[1]);
 		if s is None:
 			func.error("Errore nella scelta del primo nodo vicino, scegline un altro.")
 		else:
@@ -197,10 +197,15 @@ if host == "":
 					":" + func.format_string(nElement, const.LENGTH_SECTION_IPV6, "0"))
 func.gtext("IP: " + host)
 
-####### DEMONE
+####### DEMONI
 
-daemonThread = daemon.Daemon(host, SN, sn_network, listPkt, listUsers, listFiles)
-daemonThread.setName("DAEMON")
+if SN:
+	daemonThread = daemon.Daemon(host, True, sn_network, listPkt, listUsers, listFiles)
+	daemonThread.setName("DAEMON SN")
+	daemonThread.start()
+
+daemonThread = daemon.Daemon(host, False, sn_network, listPkt, listUsers, listFiles)
+daemonThread.setName("DAEMON PEER")
 daemonThread.start()	
 
 ####### INIZIALIZZAZIONE NETWORK

@@ -67,24 +67,21 @@ def writeHelp():
 
 def create_socket_server(myHost, port):
 	s = None
-	if len(myHost) < 55:
-		for res in socket.getaddrinfo(myHost, int(port), socket.AF_UNSPEC,socket.SOCK_STREAM, 0, socket.AI_PASSIVE):
-		    af, socktype, proto, canonname, sa = res
-		    try:
-		        s = socket.socket(af, socktype, proto)
-		    except socket.error as msg:
-		        s = None
-		        continue
-		    try:
-		        s.bind(sa)
-		        s.listen(10)
-		    except socket.error as msg:
-		        s.close()
-		        s = None
-		        continue
-		    break
-	else:
-		func.error("Errore dimensione IP.")
+	for res in socket.getaddrinfo(None, int(port), socket.AF_UNSPEC,socket.SOCK_STREAM, 0, socket.AI_PASSIVE):
+	    af, socktype, proto, canonname, sa = res
+	    try:
+	        s = socket.socket(af, socktype, proto)
+	    except socket.error as msg:
+	        s = None
+	        continue
+	    try:
+	        s.bind(sa)
+	        s.listen(10)
+	    except socket.error as msg:
+	        s.close()
+	        s = None
+	        continue
+	    break
 	return s
 
 def create_socket_client(myHost, port):
