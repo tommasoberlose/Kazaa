@@ -42,7 +42,6 @@ def request_add_file(sessionID, md5, fileName):
 	return pack
 
 def request_remove_file(sessionID, md5):
-	fileName = func.format_string(fileName, const.LENGTH_FILENAME, " ")
 	pack = bytes(const.CODE_REMOVEFILE, "ascii") + bytes(sessionID, "ascii") + bytes(md5, "ascii")
 	return pack
 

@@ -72,7 +72,16 @@ class Daemon(Thread):
 								else:
 									func.write_daemon_error(self.name, addr[0], "SN NETWORK - Super nodo già presente")
 							else:
-								func.write_daemon_error(self.name, addr[0], "Pacchetto già ricevuto")
+								func.write_daemon_error(self.name, addr[0], "Tempo per la risposta terminato.")
+						else:
+							if func.check_sn(ricevutoByte[4:20], self.listPkt) is True:
+								if not [ricevutoByte[20:75], ricevutoByte[75:80]] in self.sn_network:
+									self.sn_network.append([ricevutoByte[20:75], ricevutoByte[75:80]])
+									func.write_daemon_success(self.name, addr[0], "SN NETWORK - Added: " + str(ricevutoByte[20:75], "ascii"))
+								else:
+									func.write_daemon_error(self.name, addr[0], "SN NETWORK - Super nodo già presente")
+							else:
+								func.write_daemon_error(self.name, addr[0], "Tempo per la risposta terminato.")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_LOGIN: ### LOGIN
 						if SN:
@@ -113,6 +122,7 @@ class Daemon(Thread):
 							for file in listFiles:
 								if ricevutoByte[4:] is file[2]:
 									del file
+									nDelete += 1
 
 							pk = pack.answer_logout(nDelete)
 							conn.sendall(pk)
@@ -124,13 +134,13 @@ class Daemon(Thread):
 						if func.add_pktid(ricevutoByte[4:20], self.listPkt) is True:
 							# Inoltro
 							pk = pack.forward_query(ricevutoByte)
-							func.forward(pk, addr[0], self.sn_network)
+							func.forward(pk, addr[0], self.sn_network) # Da controllare
 
 							# Rispondi
-							listFileFounded = func.search_file(func.reformat_string(str(ricevutoByte[82:],"ascii")))
+							listFileFounded = func.search_file(func.reformat_string(str(ricevutoByte[82:],"ascii"))) # Da controllare
 							if len(listFileFounded) != 0:
 								for x in listFileFounded:
-									pk = pack.answer_query(ricevutoByte[4:20], self.host46, x[0], x[1])
+									pk = pack.answer_query(ricevutoByte[4:20], self.host, x[0], x[1])
 									sC = func.create_socket_client(func.roll_the_dice(ricevutoByte[20:75]), ricevutoByte[75:80])
 									if sC != None:
 										sC.sendall(pk)
@@ -142,7 +152,7 @@ class Daemon(Thread):
 						if func.check_query(ricevutoByte[4:20], self.listPkt):
 							listResultQuery.append([len(listResultQuery), ricevutoByte[80:112], ricevutoByte[112:], ricevutoByte[20:75], ricevutoByte[75:80]])
 
-							""" QUI NON DEVE STAMPARE MA CREARE UN UNICO PACCHETTO E INVIARE
+							""" QUI NON DEVE STAMPARE MA CREARE UN UNICO PACCHETTO E INVIARE (DOPO AVER ATTESO 20S)
 							print(str(len(listResultQuery)) + "\t" + str(ricevutoByte[112:], "ascii").strip() + "\t" + str(ricevutoByte[20:75],"ascii"))
 							"""
 						else: 
@@ -155,6 +165,9 @@ class Daemon(Thread):
 							func.upload(filef, conn)
 					else:
 						func.write_daemon_error(self.name, addr[0], "Ricevuto pacchetto sbagliato: " + str(ricevutoByte, "ascii"))
+
+					elif str(ricevutoByte[0:4], "ascii") == const.CODE_SEARCH: ### Richiesta di ricerca da un peer
+						# Creare il pacchetto QUER e spedirlo
 
 			s.close()
 

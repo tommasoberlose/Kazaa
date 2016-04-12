@@ -94,15 +94,14 @@ def create_socket_client(myHost, port):
 	    break
 	return s
 
-def forward(pk, addr, sn_network):
+def forward(pk, addr, l): # Non andrebbe fatto generico?
 	if pk != bytes(const.ERROR_PKT, "ascii"):
-		if not [pk[20:75], pk[75:80]] in sn_network:
-			for x in sn_network:
-				if addr != x[0]:
-					s = func.create_socket_client(func.roll_the_dice(x[0]), x[1])
-					if not(s is None):
-						s.sendall(pk)
-						s.close()
+		for x in l:
+			if addr != x[0]:
+				s = func.create_socket_client(func.roll_the_dice(x[0]), x[1])
+				if not(s is None):
+					s.sendall(pk)
+					s.close()
 
 ###### IP
 
@@ -119,7 +118,7 @@ def get_ipv6(ip):
 ###### SEARCH FILE
 
 #funzione di ricerca file all'interno della cartella FileCondivisi
-def search_file(query):
+def search_file(query): # Da modificare, la ricerca va fatta sui file miei ma anche dei miei peer
 	file_list = []
 	file_found_list = []
 	file_list = os.listdir(const.FILE_COND)
@@ -263,6 +262,11 @@ def download(selectFile):
 			except:
 				print("Apertura non riuscita")
 
+# Scelta random tra Supernodi
+
+def choose_SN(sn_network):
+	return random.choice(sn_network)
+
 
 ####### USERS
 def countUserFile(sessionID, listFiles):
@@ -276,3 +280,5 @@ def isUserLogged(sessionID, listUsers):
 		if sessionID is user[2]:
 			return True
 	return False
+
+def create_forward_list(sn_network, ):
