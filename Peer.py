@@ -20,7 +20,7 @@ def login(host, SN_host, listPkt):
 		return sessionID
 
 def update_network(host, listPkt):
-	func.warning("\nP2P >> CREATION NETWORK: ")
+	func.warning("\nP2P >> CREATION NETWORK")
 
 	while True:
 		nGroup = input("Inserire il numero del gruppo: ")
@@ -45,7 +45,7 @@ def update_network(host, listPkt):
 	# Caricamento
 	print("Loading...")
 
-	for i in range(0, const.MAX_TIME / 1000)
+	for i in range(0, const.MAX_TIME / 1000):
 		time.sleep(1)
 		print("|||", end = "")
 
@@ -127,12 +127,6 @@ def logout(ip, sessionID, SN_host):
 ####### VARIABILI 
 
 SN = False
-if (len(sys.argv) > 1) and (sys.argv[1] == "-sn"):
-	SN = True
-	func.warning("\nP2P >> INIZIALIZZAZIONE COME SUPER NODO")
-else:
-	func.warning("\nP2P >> INIZIALIZZAZIONE COME PEER")
-
 sessionID = ""
 SN_host = []
 
@@ -141,24 +135,66 @@ listPkt = [] # [pktid, time]
 listUsers = [] # [ip, port, sessionID]
 listFiles = [] # [md5, fileName, sessionID]
 
+host = ""
+
 ####### INIZIALIZZAZIONE
 
-if len(sys.argv) > 2:
-	if SN:
-		nGroup = sys.argv[2]
-		nElement = sys.argv[3]
-	else:
-		nGroup = sys.argv[1]
-		nElement = sys.argv[2]
+for i in range(len(sys.argv)):
+
+	if sys.argv[i] == "-sn":
+		SN = True
+
+	elif sys.argv[i] == "-ip":
+		try:
+			nGroup = sys.argv[i + 1]
+			nElement = sys.argv[i + 2]
+		
+			host = ("172.030." + func.format_string(nGroup, const.LENGTH_SECTION_IPV4, "0") + 
+						"." + func.format_string(nElement, const.LENGTH_SECTION_IPV4, "0") + 
+						"|fc00:0000:0000:0000:0000:0000:" + func.format_string(nGroup, const.LENGTH_SECTION_IPV6, "0") + 
+						":" + func.format_string(nElement, const.LENGTH_SECTION_IPV6, "0"))
+		except:
+			func.error("Errore inserimento dati")
+			func.writeHelp()
+
+	elif sys.argv[i] == "-p":
+		try:
+			const.PORT = sys.argv[i + 1]
+		except:
+			func.error("Errore inserimento dati")
+			func.writeHelp()
+
+	elif sys.argv[i] == "-t":
+		try:
+			const.MAX_TIME = sys.argv[i + 1]
+		except:
+			func.error("Errore inserimento dati")
+			func.writeHelp()
+
+	elif sys.argv[i] == "-ttl":
+		try:
+			const.TTL = sys.argv[i + 1]
+		except:
+			func.error("Errore inserimento dati")
+			func.writeHelp()
+
+	elif sys.argv[i] == "-h":
+		func.writeHelp()
+
+
+if SN:
+	func.warning("\nP2P >> INIZIALIZZAZIONE COME SUPER NODO")
 else:
+	func.warning("\nP2P >> INIZIALIZZAZIONE COME PEER")
+
+
+if host == "":
 	nGroup = input("Inserire il numero del gruppo: ")
 	nElement = input("Inserire il numero dell'elemento del gruppo: ")
-
-host = ("172.030." + func.format_string(nGroup, const.LENGTH_SECTION_IPV4, "0") + 
-				"." + func.format_string(nElement, const.LENGTH_SECTION_IPV4, "0") + 
-				"|fc00:0000:0000:0000:0000:0000:" + func.format_string(nGroup, const.LENGTH_SECTION_IPV6, "0") + 
-				":" + func.format_string(nElement, const.LENGTH_SECTION_IPV6, "0"))
-
+	host = ("172.030." + func.format_string(nGroup, const.LENGTH_SECTION_IPV4, "0") + 
+					"." + func.format_string(nElement, const.LENGTH_SECTION_IPV4, "0") + 
+					"|fc00:0000:0000:0000:0000:0000:" + func.format_string(nGroup, const.LENGTH_SECTION_IPV6, "0") + 
+					":" + func.format_string(nElement, const.LENGTH_SECTION_IPV6, "0"))
 func.gtext("IP: " + host)
 
 ####### DEMONE
@@ -176,7 +212,7 @@ func.gtext("SN HOST: " + SN_host[0])
 
 ####### LOGIN AUTOMATICO PEER
 
-func.warning("\nP2P >> PEER LOGIN:")
+func.warning("\nP2P >> PEER LOGIN")
 sessionID = login(host, SN_host, listPkt)
 if sessionID is not const.ERROR_LOG:
 	func.success("Session ID: " + sessionID)

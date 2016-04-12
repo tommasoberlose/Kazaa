@@ -22,6 +22,7 @@ def reformat_string(text):
 	return text.strip()
 
 def	write_right_text(text):
+	print("")
 	print(str(text).rjust(shutil.get_terminal_size((80, 20))[0]))
 
 def write_daemon_error(host, addr, text):
@@ -51,6 +52,16 @@ def random_pktid(length):
 
 def random_sessionID(length):
    return ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') for i in range(length))
+
+def writeHelp():
+	func.warning("\nPOSSIBILI ARGOMENTI:")
+	print("Super Nodo\t-sn")
+	print("Set Default Ip\t-ip group identifer")
+	print("Change Port\t-p port")
+	print("Change time\t-t time")
+	print("Change ttl\t-ttl ttl")
+	print("")
+	sys.exit(-1)
 
 ####### SOCKET
 
@@ -284,5 +295,3 @@ def isUserLogged(sessionID, listUsers):
 		if sessionID is user[2]:
 			return True
 	return False
-
-def create_forward_list(sn_network, ):
