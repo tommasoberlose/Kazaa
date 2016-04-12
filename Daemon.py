@@ -24,6 +24,40 @@ class Daemon(Thread):
 		self.listPkt = listPkt
 		self.listUsers = listUsers
 		self.listFiles = listFiles
+		self.listResultQuery = []
+
+	def send_afin(conn):
+		if len(self.listResultQuery) != 0:
+			listaMd5 = []
+
+			while len(self.listResultQuery) != 0:
+				listaCopie = []
+				listaCopie = self.listResultQuery[0][1:]
+				
+				listaMd5.append(listaCopie)
+
+				md5 = self.listResultQuery[0][1]
+
+				del self.listResultQuery[0]
+
+				for i in self.listResultQuery:
+					if md5 == i[1]:
+						listaMd5.append(i[1:])
+						del i
+
+			pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes(func.format_string(len(listaMd5), const.LENGTH_NIDMD5, "0"), "ascii")
+
+			for i in listaMd5:
+				pk = pk + bytes(i[0][0], "ascii") + bytes(i[0][1], "ascii") + bytes(func.format_string(len(i), const.LENGTH_NCOPY, "0"), "ascii")
+				for j in i:
+					pk = pk + bytes(j[2:], "ascii") 
+
+		else:
+			pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes("0" * const.LENGTH_NIDMD5, "ascii")  
+
+		conn.sendall(pk)
+		conn.close()
+
 
 	def run(self):
 		# Creazione socket
@@ -118,7 +152,7 @@ class Daemon(Thread):
 								if ricevutoByte[4:] is user[2]:
 									del user
 
-							int nDelete = 0
+							nDelete = 0
 							for file in listFiles:
 								if ricevutoByte[4:] is file[2]:
 									del file
@@ -150,7 +184,7 @@ class Daemon(Thread):
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ANSWER_QUERY: ### RISPOSTA QUERY tra SN
 						if func.check_query(ricevutoByte[4:20], self.listPkt):
-							listResultQuery.append([len(listResultQuery), ricevutoByte[80:112], ricevutoByte[112:], ricevutoByte[20:75], ricevutoByte[75:80]])
+							self.listResultQuery.append([len(self.listResultQuery), ricevutoByte[80:112], ricevutoByte[112:], ricevutoByte[20:75], ricevutoByte[75:80]])
 
 							""" QUI NON DEVE STAMPARE MA CREARE UN UNICO PACCHETTO E INVIARE (DOPO AVER ATTESO 20S)
 							print(str(len(listResultQuery)) + "\t" + str(ricevutoByte[112:], "ascii").strip() + "\t" + str(ricevutoByte[20:75],"ascii"))
@@ -167,7 +201,18 @@ class Daemon(Thread):
 						func.write_daemon_error(self.name, addr[0], "Ricevuto pacchetto sbagliato: " + str(ricevutoByte, "ascii"))
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_SEARCH: ### Richiesta di ricerca da un peer
-						# Creare il pacchetto QUER e spedirlo
+						if SN:
+							func.write_daemon_text(self.name, addr[0], "INIZIO RICERCA DI: " + str(ricevutoByte[82:], "ascii"))
+							pk = pack.query(self.host, ricevutoByte[20:])
+
+							for x in sn_network:
+								sNet = func.create_socket_client(func.roll_the_dice(x[0]), x[1])
+								if sNet != None:
+									sNet.sendall(pk)
+									sNet.close()
+
+							threading.Timer(20, send_afin(conn)).start()	
+
 
 			s.close()
 
