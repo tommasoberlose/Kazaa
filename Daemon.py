@@ -134,7 +134,7 @@ class Daemon(Thread):
 						if func.add_pktid(ricevutoByte[4:20], self.listPkt) is True:
 							# Inoltro
 							pk = pack.forward_query(ricevutoByte)
-							func.forward(pk, addr[0], self.sn_network) # Da controllare
+							func.forward(pk, addr[0], self.sn_network)
 
 							# Rispondi
 							listFileFounded = func.search_file(func.reformat_string(str(ricevutoByte[82:],"ascii"))) # Da controllare

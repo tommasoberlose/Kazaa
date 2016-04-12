@@ -265,7 +265,11 @@ def download(selectFile):
 # Scelta random tra Supernodi
 
 def choose_SN(sn_network):
-	return random.choice(sn_network)
+	choose = random.choice(sn_network)
+	for n in sn_network:
+		if not n == choose:
+			del n
+	return choose
 
 
 ####### USERS
