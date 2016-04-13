@@ -85,7 +85,7 @@ class Daemon(Thread):
 
 							# RESPONSE
 							if self.SN:
-								pk = pack.answer_sn(ricevutoByte[4:20], host)
+								pk = pack.answer_sn(ricevutoByte[4:20], self.host)
 								sR = func.create_socket_client(func.roll_the_dice(ricevutoByte[20:75]), ricevutoByte[75:80])
 								if sR != None:
 									sR.sendall(pk)

@@ -7,7 +7,7 @@ import sys
 import time
 
 def login(host, SN_host, listPkt):
-	s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1])
+	s = func.create_socket_client(func.roll_the_dice(str(SN_host[0][0],"ascii")), SN_host[0][1])
 	pk = pack.request_login(host)
 	if s is None:
 		func.error("Errore nell'apertura della socket per il login")
@@ -271,14 +271,14 @@ else:
 
 SN_host = update_network(host, listPkt, SN_host)
 
-func.gtext("SN HOST: " + SN_host[0])
+func.gtext("SN HOST: " + str(SN_host[0][0], "ascii"))
 
 ####### LOGIN AUTOMATICO PEER
 
 func.warning("\nP2P >> PEER LOGIN")
 sessionID = login(host, SN_host, listPkt)
 if sessionID is not const.ERROR_LOG:
-	func.success("Session ID: " + sessionID)
+	func.success("Session ID: " + str(sessionID,"ascii"))
 
 	# MENU
 
