@@ -68,6 +68,55 @@ def search(sessionID, query, SN_host, host, listPkt):
 		update_network(host, listPkt)
 	else:
 		s.sendall(pk)
+		while len(ricevutoByteRam) < const.LENGTH_PACK:
+			ricevutoByteRam = s.recv(const.LENGTH_PACK)
+			ricevutoByte = ricevutoByte + ricevutoByteRam
+
+		if str(ricevutoByte[0:4],"ascii") == const.CODE_ANSWER_SEARCH:
+			nIdmd5 = int(ricevutoByte[4:7])
+			if(nIdmd5 != 0):
+				func.success("Ricerca completata.")
+				pointer = 7
+				id = 0
+				listFile = []
+				for j in range(0, nIdmd5):
+					md5 = ricevutoByte[pointer:pointer + 32]
+					nomeFile = ricevutoByte[pointer + 32:pointer + 132]
+					nCopy = int(ricevutoByte[pointer + 132:pointer + 135])
+
+					pointer = pointer + 135
+
+					for i in range(0, nCopy):
+						ip = ricevutoByte[pointer:pointer + 55]
+						port = ricevutoByte[pointer + 55:pointer + 60]
+						id = id + 1
+						pointer = pointer + 60
+						fixList = [id, md5, nomeFile, ip, port]
+						listFile.append(fixList)
+
+				print("\nScegli file da quelli disponibili (0 per uscire): \n")
+				print("FILE    \t\tID\tIP\n")
+				lastFileName = b''
+				for row in listFile:
+					if lastFileName != row[2]:
+						nomeFile = func.format_string((str(row[2], "ascii").strip() + ":"), LENGTH_FORMAT, " ")
+						print(nomeFile + str(row[0]) + "\t" + str(row[3], "ascii"))
+					elif
+						print("\t\t\t" + str(row[0]) + "\t" + str(row[3], "ascii"))
+					lastFileName = str(row[2], "ascii")
+				
+				selectId = input("\nInserire il numero di file che vuoi scaricare (0 per uscire): ")
+				
+				if(selectId != "0"):
+					for i in range (0, id):
+						if listFile[i][0] == int(selectId):
+							selectFile = listFile[i]
+							break
+
+					func.download(selectFile)
+
+			else:
+				func.error("Non sono presenti file con questa query nel nome: " + query)
 		s.close()
 
 # Funzione di aggiunta file

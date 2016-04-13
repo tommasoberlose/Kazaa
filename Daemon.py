@@ -33,13 +33,10 @@ class Daemon(Thread):
 			while len(self.listResultQuery) != 0:
 				listaCopie = []
 				listaCopie = self.listResultQuery[0][1:]
-				
 				listaMd5.append(listaCopie)
-
 				md5 = self.listResultQuery[0][1]
-
 				del self.listResultQuery[0]
-
+				
 				for i in self.listResultQuery:
 					if md5 == i[1]:
 						listaMd5.append(i[1:])
@@ -185,10 +182,6 @@ class Daemon(Thread):
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ANSWER_QUERY: ### RISPOSTA QUERY tra SN
 						if func.check_query(ricevutoByte[4:20], self.listPkt):
 							self.listResultQuery.append([len(self.listResultQuery), ricevutoByte[80:112], ricevutoByte[112:], ricevutoByte[20:75], ricevutoByte[75:80]])
-
-							""" QUI NON DEVE STAMPARE MA CREARE UN UNICO PACCHETTO E INVIARE (DOPO AVER ATTESO 20S)
-							print(str(len(listResultQuery)) + "\t" + str(ricevutoByte[112:], "ascii").strip() + "\t" + str(ricevutoByte[20:75],"ascii"))
-							"""
 						else: 
 							func.write_daemon_error(self.name, addr[0], "ANSWER QUERY - Ricerca conclusa")
 					
@@ -212,8 +205,6 @@ class Daemon(Thread):
 									sNet.close()
 
 							threading.Timer(20, send_afin(conn)).start()	
-
-
 			s.close()
 
 
