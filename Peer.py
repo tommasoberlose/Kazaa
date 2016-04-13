@@ -101,7 +101,7 @@ def search(sessionID, query, SN_host, host, listPkt):
 					if lastFileName != row[2]:
 						nomeFile = func.format_string((str(row[2], "ascii").strip() + ":"), LENGTH_FORMAT, " ")
 						print(nomeFile + str(row[0]) + "\t" + str(row[3], "ascii"))
-					elif
+					else:
 						print("\t\t\t" + str(row[0]) + "\t" + str(row[3], "ascii"))
 					lastFileName = str(row[2], "ascii")
 				

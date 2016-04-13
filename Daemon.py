@@ -190,10 +190,8 @@ class Daemon(Thread):
 						filef = func.find_file_by_md5(ricevutoByte[4:])
 						if filef != const.ERROR_FILE:
 							func.upload(filef, conn)
-					else:
-						func.write_daemon_error(self.name, addr[0], "Ricevuto pacchetto sbagliato: " + str(ricevutoByte, "ascii"))
 
-					elif str(ricevutoByte[0:4], "ascii") == const.CODE_SEARCH: ### Richiesta di ricerca da un peer
+					elif(str(ricevutoByte[0:4], "ascii") == const.CODE_SEARCH): ### Richiesta di ricerca da un peer
 						if SN:
 							func.write_daemon_text(self.name, addr[0], "INIZIO RICERCA DI: " + str(ricevutoByte[82:], "ascii"))
 							pk = pack.query(self.host, ricevutoByte[20:])
@@ -205,6 +203,8 @@ class Daemon(Thread):
 									sNet.close()
 
 							threading.Timer(20, send_afin(conn)).start()	
+					else:
+						func.write_daemon_error(self.name, addr[0], "Ricevuto pacchetto sbagliato: " + str(ricevutoByte, "ascii"))
 			s.close()
 
 
