@@ -19,7 +19,7 @@ def login(host, SN_host, listPkt):
 		s.close()
 		return sessionID
 
-def update_network(host, listPkt):
+def update_network(host, listPkt, SN_host):
 	func.warning("\nP2P >> CREATION NETWORK")
 
 	while True:
@@ -31,8 +31,11 @@ def update_network(host, listPkt):
 					":" + func.format_string(nElement, const.LENGTH_SECTION_IPV6, "0")), const.PORT]
 
 
+		if SN:
+			pk = pack.request_sn(host, const.PORT_SN)
+		else:
+			pk = pack.request_sn(host, const.PORT)
 
-		pk = pack.request_sn(host)
 		func.add_pktid(pk[4:20], listPkt)
 		s = func.create_socket_client(func.roll_the_dice(Fhost[0]), Fhost[1]);
 		if s is None:
@@ -45,7 +48,7 @@ def update_network(host, listPkt):
 	# Caricamento
 	print("Loading...")
 
-	for i in range(0, const.MAX_TIME / 1000):
+	for i in range(0, int(const.MAX_TIME / 1000)):
 		time.sleep(1)
 		print("|||", end = "")
 
@@ -58,6 +61,8 @@ def update_network(host, listPkt):
 		SN_host = [host, const.PORT_SN]
 	else:
 		SN_host = func.choose_SN(sn_network)
+
+	return SN_host
 
 
 def search(sessionID, query, SN_host, host, listPkt):
@@ -215,7 +220,7 @@ for i in range(len(sys.argv)):
 
 	elif sys.argv[i] == "-t":
 		try:
-			const.MAX_TIME = sys.argv[i + 1]
+			const.MAX_TIME = int(sys.argv[i + 1]) * 1000
 		except:
 			func.error("Errore inserimento dati")
 			func.writeHelp()
@@ -249,18 +254,22 @@ func.gtext("IP: " + host)
 ####### DEMONI
 
 if SN:
-	daemonThread = daemon.Daemon(host, True, sn_network, listPkt, listUsers, listFiles)
+	daemonThread = daemon.Daemon(host, True, sn_network, listPkt, listUsers, listFiles, True)
 	daemonThread.setName("DAEMON SN")
 	daemonThread.start()
 
-daemonThread = daemon.Daemon(host, False, sn_network, listPkt, listUsers, listFiles)
-daemonThread.setName("DAEMON PEER")
-daemonThread.start()	
+	daemonThread = daemon.Daemon(host, True, sn_network, listPkt, listUsers, listFiles, False)
+	daemonThread.setName("DAEMON PEER")
+	daemonThread.start()
+
+else:
+	daemonThread = daemon.Daemon(host, False, sn_network, listPkt, listUsers, listFiles, False)
+	daemonThread.setName("DAEMON PEER")
+	daemonThread.start()	
 
 ####### INIZIALIZZAZIONE NETWORK
 
-update_network(host, listPkt)
-
+SN_host = update_network(host, listPkt, SN_host)
 
 func.gtext("SN HOST: " + SN_host[0])
 

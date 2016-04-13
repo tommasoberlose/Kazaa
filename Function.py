@@ -56,7 +56,7 @@ def random_sessionID(length):
 def writeHelp():
 	func.warning("\nPOSSIBILI ARGOMENTI:")
 	print("Super Nodo\t-sn")
-	print("Set Default Ip\t-ip group identifer")
+	print("Set Default Ip\t-ip group identifier")
 	print("Change Port\t-p port")
 	print("Change time\t-t time")
 	print("Change ttl\t-ttl ttl")
@@ -70,17 +70,17 @@ def create_socket_server(myHost, port):
 	for res in socket.getaddrinfo(None, int(port), socket.AF_UNSPEC,socket.SOCK_STREAM, 0, socket.AI_PASSIVE):
 	    af, socktype, proto, canonname, sa = res
 	    try:
-	        s = socket.socket(af, socktype, proto)
+	    	s = socket.socket(af, socktype, proto)
 	    except socket.error as msg:
-	        s = None
-	        continue
+	    	s = None
+	    	continue
 	    try:
-	        s.bind(sa)
-	        s.listen(10)
+	    	s.bind(sa)
+	    	s.listen(10)
 	    except socket.error as msg:
-	        s.close()
-	        s = None
-	        continue
+	    	s.close()
+	    	s = None
+	    	continue
 	    break
 	return s
 
@@ -273,7 +273,7 @@ def download(selectFile):
 # Scelta random tra Supernodi
 
 def choose_SN(sn_network):
-	choose = random.choice(sn_network)
+	choose = random.sample(sn_network, 1)
 	for n in sn_network:
 		if not n == choose:
 			del n

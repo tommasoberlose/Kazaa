@@ -11,12 +11,12 @@ class Daemon(Thread):
 	# Inizializza il thread, prende in ingresso l'istanza e un valore su cui ciclare
 	# Tutti i metodi di una classe prendono l'istanza come prima variabile in ingresso
 	# __init__ è un metodo predefinito per creare il costruttore
-	def __init__(self, host, SN, sn_network, listPkt, listUsers, listFiles):
+	def __init__(self, host, SN, sn_network, listPkt, listUsers, listFiles, role):
 		# Costruttore
 		Thread.__init__(self)
 		self.host = host
 		self.SN = SN
-		if SN:
+		if role:
 			self.port = const.PORT_SN
 		else:
 			self.port = const.PORT
@@ -58,7 +58,7 @@ class Daemon(Thread):
 
 	def run(self):
 		# Creazione socket
-		s = func.create_socket_server(self.host, self.port)
+		s = func.create_socket_server(func.roll_the_dice(self.host), self.port)
 
 		if s is None:
 			func.write_daemon_text(self.name, self.host, 'Error: Daemon could not open socket in upload.')
@@ -84,7 +84,7 @@ class Daemon(Thread):
 							func.forward(pk, addr[0], self.sn_network)
 
 							# RESPONSE
-							if SN:
+							if self.SN:
 								pk = pack.answer_sn(ricevutoByte[4:20], host)
 								sR = func.create_socket_client(func.roll_the_dice(ricevutoByte[20:75]), ricevutoByte[75:80])
 								if sR != None:
@@ -94,11 +94,11 @@ class Daemon(Thread):
 							func.write_daemon_error(self.name, addr[0], "Pacchetto già ricevuto")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ANSWER_SN: ### ANSWER SN
-						if SN:
+						if self.SN:
 							if func.check_sn(ricevutoByte[4:20], self.listPkt) is True:
 								# ADD SN TO NETWORK
 								if not [ricevutoByte[20:75], ricevutoByte[75:80]] in self.sn_network:
-									self.sn_network.append([ricevutoByte[20:75], ricevutoByte[75:80]])
+									self.sn_network.append([str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")])
 									func.write_daemon_success(self.name, addr[0], "SN NETWORK - Added: " + str(ricevutoByte[20:75], "ascii"))
 								else:
 									func.write_daemon_error(self.name, addr[0], "SN NETWORK - Super nodo già presente")
@@ -115,7 +115,7 @@ class Daemon(Thread):
 								func.write_daemon_error(self.name, addr[0], "Tempo per la risposta terminato.")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_LOGIN: ### LOGIN
-						if SN:
+						if self.SN:
 							pk = pack.answer_login()
 							conn.sendall(pk)
 							user = [ricevutoByte[4:59], ricevutoByte[59:], pk[4:]]
@@ -124,7 +124,7 @@ class Daemon(Thread):
 								func.write_daemon_succes(self.name, addr[0], "LOGIN OK")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ADDFILE:
-						if SN:
+						if self.SN:
 							if func.isUserLogged(ricevutoByte[4:20], listUsers):
 								listFiles.insert(0, [ricevutoByte[20:52], ricevutoByte[52:152], ricevutoByte[4:20]])
 								func.write_daemon_succes(self.name, addr[0], "ADD FILE: " + str(ricevutoByte[52:152], "ascii").strip())
@@ -132,7 +132,7 @@ class Daemon(Thread):
 								func.write_daemon_error(self.name, addr[0], "ADD FILE - User not logged")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_REMOVEFILE:
-						if SN:
+						if self.SN:
 							if func.isUserLogged(ricevutoByte[4:20], listUsers):
 								for file in listFiles:
 									if (ricevutoByte[4:20] is file[2]) and (ricevutoByte[20:] is file[0]):
@@ -144,7 +144,7 @@ class Daemon(Thread):
 								func.write_daemon_error(self.name, addr[0], "REMOVE FILE - User not logged")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_LOGOUT: ### LOGOUT
-						if SN:
+						if self.SN:
 							for user in listUsers:
 								if ricevutoByte[4:] is user[2]:
 									del user
@@ -192,7 +192,7 @@ class Daemon(Thread):
 							func.upload(filef, conn)
 
 					elif(str(ricevutoByte[0:4], "ascii") == const.CODE_SEARCH): ### Richiesta di ricerca da un peer
-						if SN:
+						if self.SN:
 							func.write_daemon_text(self.name, addr[0], "INIZIO RICERCA DI: " + str(ricevutoByte[82:], "ascii"))
 							pk = pack.query(self.host, ricevutoByte[20:])
 

@@ -3,9 +3,9 @@ import Function as func
 
 
 # PKT SN
-def request_sn(ip):
+def request_sn(ip, port):
 	pk_id = func.random_pktid(const.LENGTH_PKTID)
-	port = func.format_string(const.PORT_SN, const.LENGTH_PORT, "0")
+	port = func.format_string(port, const.LENGTH_PORT, "0")
 	step = func.format_string(const.TTL_SN, const.LENGTH_TTL, "0")
 	pack = bytes(const.CODE_SN, "ascii") + bytes(pk_id, "ascii") + bytes(ip, "ascii") + bytes(port, "ascii") + bytes(step, "ascii")
 	return pack
