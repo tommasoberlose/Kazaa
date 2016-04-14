@@ -97,7 +97,7 @@ class Daemon(Thread):
 						if self.SN:
 							if func.check_sn(ricevutoByte[4:20], self.listPkt) is True:
 								# ADD SN TO NETWORK
-								if not [ricevutoByte[20:75], ricevutoByte[75:80]] in self.sn_network:
+								if not [str(ricevutoByte[20:75], "ascii"), str(ricevutoByte[75:80], "ascii")] in self.sn_network:
 									self.sn_network.append([str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")])
 									func.write_daemon_success(self.name, addr[0], "SN NETWORK - Added: " + str(ricevutoByte[20:75], "ascii"))
 								else:
@@ -106,8 +106,8 @@ class Daemon(Thread):
 								func.write_daemon_error(self.name, addr[0], "Tempo per la risposta terminato.")
 						else:
 							if func.check_sn(ricevutoByte[4:20], self.listPkt) is True:
-								if not [ricevutoByte[20:75], ricevutoByte[75:80]] in self.sn_network:
-									self.sn_network.append([ricevutoByte[20:75], ricevutoByte[75:80]])
+								if not [str(ricevutoByte[20:75], "ascii"), str(ricevutoByte[75:80], "ascii")] in self.sn_network:
+									self.sn_network.append([str(ricevutoByte[20:75], "ascii"), str(ricevutoByte[75:80],"ascii")])
 									func.write_daemon_success(self.name, addr[0], "SN NETWORK - Added: " + str(ricevutoByte[20:75], "ascii"))
 								else:
 									func.write_daemon_error(self.name, addr[0], "SN NETWORK - Super nodo già presente")
@@ -172,7 +172,7 @@ class Daemon(Thread):
 							if len(listFileFounded) != 0:
 								for x in listFileFounded:
 									pk = pack.answer_query(ricevutoByte[4:20], self.host, x[0], x[1])
-									sC = func.create_socket_client(func.roll_the_dice(ricevutoByte[20:75]), ricevutoByte[75:80])
+									sC = func.create_socket_client(func.roll_the_dice(str(ricevutoByte[20:75], "ascii"), ricevutoByte[75:80])
 									if sC != None:
 										sC.sendall(pk)
 										sC.close()
