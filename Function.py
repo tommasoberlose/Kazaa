@@ -8,6 +8,7 @@ import hashlib
 import time
 import Constant as const
 import Function as func
+import Package as pack
 
 ####### STRINGHE
 
@@ -91,7 +92,6 @@ def create_socket_client(myHost, port):
 	    af, socktype, proto, canonname, sa = res
 	    try:
 	        s = socket.socket(af, socktype, proto)
-	        print("IP:" + myHost)
 	    except socket.error as msg:
 	        s = None
 	        continue
@@ -292,7 +292,7 @@ def countUserFile(sessionID, listFiles):
 
 def isUserLogged(sessionID, listUsers):
 	for user in listUsers:
-		if sessionID is user[2]:
+		if sessionID == user[2]:
 			return True
 	return False
 
@@ -303,6 +303,17 @@ def reconnect_user(ip, listUsers):
 			pk = pack.answer_login()[:4] + user[2]
 			break
 	return pk
+
+def check_file(listFiles, ricevutoByte):
+	fileConfronto = [ricevutoByte[20:52], ricevutoByte[52:152], ricevutoByte[4:20]]
+	for file in listFiles:
+		if (file[0] == fileConfronto[0]) and (file[2] == fileConfronto[2]):
+			return False
+	return True
+
+
+
+
 
 
 

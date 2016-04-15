@@ -116,7 +116,7 @@ class Daemon(Thread):
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_LOGIN: ### LOGIN
 						if self.SN:
-							pk = func.reconnect_user(str(ricevutoByte[4:59], "ascii"), self.listUsers)
+							pk = func.reconnect_user(ricevutoByte[4:59], self.listUsers)
 							if pk == const.ERROR_PKT: 
 								pk = pack.answer_login()
 							conn.sendall(pk)
@@ -125,12 +125,18 @@ class Daemon(Thread):
 								self.listUsers.append(user)
 								func.write_daemon_success(self.name, addr[0], "LOGIN OK")
 							else: func.write_daemon_success(self.name, addr[0], "RECONNECT OK")
+							print(self.listUsers)
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ADDFILE:
 						if self.SN:
+							print(ricevutoByte[4:20])
+							print(self.listUsers)
 							if func.isUserLogged(ricevutoByte[4:20], self.listUsers):
-								self.listFiles.insert(0, [ricevutoByte[20:52], ricevutoByte[52:152], ricevutoByte[4:20]])
-								func.write_daemon_success(self.name, addr[0], "ADD FILE: " + str(ricevutoByte[52:152], "ascii").strip())
+								if(func.check_file(self.listFiles, ricevutoByte))
+									self.listFiles.insert(0, [ricevutoByte[20:52], ricevutoByte[52:152], ricevutoByte[4:20]])
+									func.write_daemon_success(self.name, addr[0], "ADD FILE: " + str(ricevutoByte[52:152], "ascii").strip())
+								else:
+									func.write_daemon_error(self.name, addr[0], "ADD FILE - File già inserito")
 							else:
 								func.write_daemon_error(self.name, addr[0], "ADD FILE - User not logged")
 
@@ -138,7 +144,7 @@ class Daemon(Thread):
 						if self.SN:
 							if func.isUserLogged(ricevutoByte[4:20], self.listUsers):
 								for file in self.listFiles:
-									if (ricevutoByte[4:20] is file[2]) and (ricevutoByte[20:] is file[0]):
+									if (ricevutoByte[4:20] == file[2]) and (ricevutoByte[20:] == file[0]):
 										del file
 										func.write_daemon_success(self.name, addr[0], "REMOVE FILE: " + str(ricevutoByte[20:], "ascii").strip())
 									else:
@@ -149,12 +155,12 @@ class Daemon(Thread):
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_LOGOUT: ### LOGOUT
 						if self.SN:
 							for user in self.listUsers:
-								if ricevutoByte[4:] is user[2]:
+								if ricevutoByte[4:] == user[2]:
 									del user
 
 							nDelete = 0
 							for file in self.listFiles:
-								if ricevutoByte[4:] is file[2]:
+								if ricevutoByte[4:] == file[2]:
 									del file
 									nDelete += 1
 

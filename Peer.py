@@ -5,7 +5,7 @@ import Daemon as daemon
 import os
 import sys
 import time
-import threading
+import hashlib
 
 def login(host, SN_host, listPkt):
 	s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1])
@@ -305,13 +305,13 @@ if sessionID is not const.ERROR_LOG:
 
 		if (choice == "add" or choice == "a"):
 			func.warning("\n>>> ADD FILE")
-			fileName = input("Quale file vuoi inserire?")
+			fileName = input("Quale file vuoi inserire?\n")
 			if fileName is not "0":
 				add_file(fileName, sessionID, SN_host, host, listPkt)
 
 		elif (choice == "remove" or choice == "r"):
 			func.warning("\n>>> REMOVE FILE")
-			fileName = input("Quale file vuoi rimuovere?")
+			fileName = input("Quale file vuoi rimuovere?\n")
 			if fileName is not "0":
 				remove_file(fileName, sessionID, SN_host, host, listPkt)
 

@@ -38,11 +38,11 @@ def answer_login():
 
 def request_add_file(sessionID, md5, fileName):
 	fileName = func.format_string(fileName, const.LENGTH_FILENAME, " ")
-	pack = bytes(const.CODE_ADDFILE, "ascii") + bytes(sessionID, "ascii") + bytes(md5, "ascii") + bytes(fileName, "ascii")
+	pack = bytes(const.CODE_ADDFILE, "ascii") + sessionID + bytes(md5, "ascii") + bytes(fileName, "ascii")
 	return pack
 
 def request_remove_file(sessionID, md5):
-	pack = bytes(const.CODE_REMOVEFILE, "ascii") + bytes(sessionID, "ascii") + bytes(md5, "ascii")
+	pack = bytes(const.CODE_REMOVEFILE, "ascii") + sessionID + bytes(md5, "ascii")
 	return pack
 
 def request_logout(sessionID):
@@ -50,7 +50,7 @@ def request_logout(sessionID):
 	return pack
 
 def answer_logout(nDelete):
-	nDelete = func.format_string(Str(nDelete), const.LENGTH_ITEM_REMOVED, "0")
+	nDelete = func.format_string(str(nDelete), const.LENGTH_ITEM_REMOVED, "0")
 	pack = bytes(const.CODE_ANSWER_LOGOUT, "ascii") + bytes(nDelete, "ascii")
 	return pack
 
