@@ -50,7 +50,7 @@ def request_logout(sessionID):
 	return pack
 
 def answer_logout(nDelete):
-	nDelete = func.format_string(nDelete, const.LENGTH_ITEM_REMOVED, "0")
+	nDelete = func.format_string(Str(nDelete), const.LENGTH_ITEM_REMOVED, "0")
 	pack = bytes(const.CODE_ANSWER_LOGOUT, "ascii") + bytes(nDelete, "ascii")
 	return pack
 

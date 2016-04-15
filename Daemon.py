@@ -128,16 +128,16 @@ class Daemon(Thread):
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ADDFILE:
 						if self.SN:
-							if func.isUserLogged(ricevutoByte[4:20], listUsers):
-								listFiles.insert(0, [ricevutoByte[20:52], ricevutoByte[52:152], ricevutoByte[4:20]])
+							if func.isUserLogged(ricevutoByte[4:20], self.listUsers):
+								self.listFiles.insert(0, [ricevutoByte[20:52], ricevutoByte[52:152], ricevutoByte[4:20]])
 								func.write_daemon_success(self.name, addr[0], "ADD FILE: " + str(ricevutoByte[52:152], "ascii").strip())
 							else:
 								func.write_daemon_error(self.name, addr[0], "ADD FILE - User not logged")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_REMOVEFILE:
 						if self.SN:
-							if func.isUserLogged(ricevutoByte[4:20], listUsers):
-								for file in listFiles:
+							if func.isUserLogged(ricevutoByte[4:20], self.listUsers):
+								for file in self.listFiles:
 									if (ricevutoByte[4:20] is file[2]) and (ricevutoByte[20:] is file[0]):
 										del file
 										func.write_daemon_success(self.name, addr[0], "REMOVE FILE: " + str(ricevutoByte[20:], "ascii").strip())
@@ -148,12 +148,12 @@ class Daemon(Thread):
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_LOGOUT: ### LOGOUT
 						if self.SN:
-							for user in listUsers:
+							for user in self.listUsers:
 								if ricevutoByte[4:] is user[2]:
 									del user
 
 							nDelete = 0
-							for file in listFiles:
+							for file in self.listFiles:
 								if ricevutoByte[4:] is file[2]:
 									del file
 									nDelete += 1

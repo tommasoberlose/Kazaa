@@ -54,8 +54,11 @@ def update_network(host, listPkt):
 	print("Loading...")
 
 	for i in range(0, int(const.MAX_TIME / 1000)):
+		print("|", end = "")
+		print("|||" * i + " " * ((int(const.MAX_TIME / 1000) * 3) - (i * 3)) + "|")
 		time.sleep(1)
-		print("-" * i)
+
+	print("|" + "|||" * int(const.MAX_TIME / 1000) + "|")
 
 	if SN:
 		func.success("NETWORK CREATED:")
@@ -287,9 +290,10 @@ func.gtext("SN HOST: " + SN_host[0])
 ####### LOGIN AUTOMATICO PEER
 
 func.warning("\nP2P >> PEER LOGIN")
+print(SN_host)
 sessionID = login(host, SN_host, listPkt)
 if sessionID is not const.ERROR_LOG:
-	func.success("Session ID: " + str(sessionID,"ascii"))
+	func.success("Session ID: " + str(sessionID, "ascii"))
 
 	# MENU
 

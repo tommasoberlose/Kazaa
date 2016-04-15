@@ -91,6 +91,7 @@ def create_socket_client(myHost, port):
 	    af, socktype, proto, canonname, sa = res
 	    try:
 	        s = socket.socket(af, socktype, proto)
+	        print("IP:" + myHost)
 	    except socket.error as msg:
 	        s = None
 	        continue
