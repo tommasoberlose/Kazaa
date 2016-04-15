@@ -116,12 +116,15 @@ class Daemon(Thread):
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_LOGIN: ### LOGIN
 						if self.SN:
-							pk = pack.answer_login()
+							pk = func.reconnect_user(str(ricevutoByte[4:59], "ascii"), self.listUsers):
+							if pk == ERROR_PKT: 
+								pk = pack.answer_login()
 							conn.sendall(pk)
 							user = [ricevutoByte[4:59], ricevutoByte[59:], pk[4:]]
-							if not user in listUsers:
-								listUsers.append(user)
+							if not user in self.listUsers:
+								self.listUsers.append(user)
 								func.write_daemon_succes(self.name, addr[0], "LOGIN OK")
+							else: func.write_daemon_succes(self.name, addr[0], "RECONNECT OK")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ADDFILE:
 						if self.SN:

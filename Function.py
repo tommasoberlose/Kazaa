@@ -293,3 +293,14 @@ def isUserLogged(sessionID, listUsers):
 		if sessionID is user[2]:
 			return True
 	return False
+
+def reconnect_user(ip, listUsers):
+	pk = ERROR_PKT
+	for user in listUsers:
+		if user[0] == ip:
+			pk = pack.answer_login()[:4] + user[2]
+			break
+	return pk
+
+
+
