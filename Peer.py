@@ -52,11 +52,10 @@ def update_network(host, listPkt):
 
 	# Caricamento
 	print("Loading...")
-	
-	##### Da fare
 
-	#for i in range(0, int(const.MAX_TIME / 1000)):
-		#threading.Timer(1, progress()).start()
+	for i in range(0, int(const.MAX_TIME / 1000)):
+		time.sleep(1)
+		print("-" * i)
 
 	if SN:
 		func.success("NETWORK CREATED:")
