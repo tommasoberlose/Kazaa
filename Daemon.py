@@ -172,7 +172,7 @@ class Daemon(Thread):
 							if len(listFileFounded) != 0:
 								for x in listFileFounded:
 									pk = pack.answer_query(ricevutoByte[4:20], self.host, x[0], x[1])
-									sC = func.create_socket_client(func.roll_the_dice(str(ricevutoByte[20:75], "ascii"), ricevutoByte[75:80])
+									sC = func.create_socket_client(func.roll_the_dice(str(ricevutoByte[20:75], "ascii"), ricevutoByte[75:80]))
 									if sC != None:
 										sC.sendall(pk)
 										sC.close()

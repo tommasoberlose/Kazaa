@@ -217,6 +217,13 @@ for i in range(len(sys.argv)):
 			func.error("Errore inserimento dati")
 			func.writeHelp()
 
+	elif sys.argv[i] == "-pSN":
+		try:
+			const.PORT_SN = sys.argv[i + 1]
+		except:
+			func.error("Errore inserimento dati")
+			func.writeHelp()
+
 	elif sys.argv[i] == "-t":
 		try:
 			const.MAX_TIME = int(sys.argv[i + 1]) * 1000

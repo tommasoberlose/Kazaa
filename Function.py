@@ -58,6 +58,7 @@ def writeHelp():
 	print("Super Nodo\t-sn")
 	print("Set Default Ip\t-ip group identifier")
 	print("Change Port\t-p port")
+	print("Change Port SN\t-pSN port")
 	print("Change time\t-t time")
 	print("Change ttl\t-ttl ttl")
 	print("")
