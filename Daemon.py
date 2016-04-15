@@ -132,7 +132,7 @@ class Daemon(Thread):
 							print(ricevutoByte[4:20])
 							print(self.listUsers)
 							if func.isUserLogged(ricevutoByte[4:20], self.listUsers):
-								if(func.check_file(self.listFiles, ricevutoByte))
+								if(func.check_file(self.listFiles, ricevutoByte)):
 									self.listFiles.insert(0, [ricevutoByte[20:52], ricevutoByte[52:152], ricevutoByte[4:20]])
 									func.write_daemon_success(self.name, addr[0], "ADD FILE: " + str(ricevutoByte[52:152], "ascii").strip())
 								else:
