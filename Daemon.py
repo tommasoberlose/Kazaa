@@ -116,21 +116,21 @@ class Daemon(Thread):
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_LOGIN: ### LOGIN
 						if self.SN:
-							pk = func.reconnect_user(str(ricevutoByte[4:59], "ascii"), self.listUsers):
-							if pk == ERROR_PKT: 
+							pk = func.reconnect_user(str(ricevutoByte[4:59], "ascii"), self.listUsers)
+							if pk == const.ERROR_PKT: 
 								pk = pack.answer_login()
 							conn.sendall(pk)
 							user = [ricevutoByte[4:59], ricevutoByte[59:], pk[4:]]
 							if not user in self.listUsers:
 								self.listUsers.append(user)
-								func.write_daemon_succes(self.name, addr[0], "LOGIN OK")
-							else: func.write_daemon_succes(self.name, addr[0], "RECONNECT OK")
+								func.write_daemon_success(self.name, addr[0], "LOGIN OK")
+							else: func.write_daemon_success(self.name, addr[0], "RECONNECT OK")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ADDFILE:
 						if self.SN:
 							if func.isUserLogged(ricevutoByte[4:20], listUsers):
 								listFiles.insert(0, [ricevutoByte[20:52], ricevutoByte[52:152], ricevutoByte[4:20]])
-								func.write_daemon_succes(self.name, addr[0], "ADD FILE: " + str(ricevutoByte[52:152], "ascii").strip())
+								func.write_daemon_success(self.name, addr[0], "ADD FILE: " + str(ricevutoByte[52:152], "ascii").strip())
 							else:
 								func.write_daemon_error(self.name, addr[0], "ADD FILE - User not logged")
 
@@ -140,7 +140,7 @@ class Daemon(Thread):
 								for file in listFiles:
 									if (ricevutoByte[4:20] is file[2]) and (ricevutoByte[20:] is file[0]):
 										del file
-										func.write_daemon_succes(self.name, addr[0], "REMOVE FILE: " + str(ricevutoByte[20:], "ascii").strip())
+										func.write_daemon_success(self.name, addr[0], "REMOVE FILE: " + str(ricevutoByte[20:], "ascii").strip())
 									else:
 										func.write_daemon_error(self.name, addr[0], "REMOVE FILE - File not exists")
 							else:
@@ -160,7 +160,7 @@ class Daemon(Thread):
 
 							pk = pack.answer_logout(nDelete)
 							conn.sendall(pk)
-							func.write_daemon_succes(self.name, addr[0], "LOGOUT OK")
+							func.write_daemon_success(self.name, addr[0], "LOGOUT OK")
 
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_QUERY: ### QUERY tra SN
@@ -205,7 +205,7 @@ class Daemon(Thread):
 									sNet.sendall(pk)
 									sNet.close()
 
-							threading.Timer(20, send_afin(conn)).start()	
+							threading.Timer(const.MAX_TIME/1000, send_afin(conn)).start()	
 					else:
 						func.write_daemon_error(self.name, addr[0], "Ricevuto pacchetto sbagliato: " + str(ricevutoByte, "ascii"))
 			s.close()

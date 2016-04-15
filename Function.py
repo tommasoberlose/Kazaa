@@ -275,6 +275,7 @@ def download(selectFile):
 
 def choose_SN(sn_network):
 	choose = random.sample(sn_network, 1)
+	choose = choose[0]
 	for n in sn_network:
 		if not n == choose:
 			del n
@@ -295,7 +296,7 @@ def isUserLogged(sessionID, listUsers):
 	return False
 
 def reconnect_user(ip, listUsers):
-	pk = ERROR_PKT
+	pk = const.ERROR_PKT
 	for user in listUsers:
 		if user[0] == ip:
 			pk = pack.answer_login()[:4] + user[2]

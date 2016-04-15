@@ -5,9 +5,10 @@ import Daemon as daemon
 import os
 import sys
 import time
+import threading
 
 def login(host, SN_host, listPkt):
-	s = func.create_socket_client(func.roll_the_dice(str(SN_host[0],"ascii")), SN_host[1])
+	s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1])
 	pk = pack.request_login(host)
 	if s is None:
 		func.error("Errore nell'apertura della socket per il login")
@@ -19,16 +20,20 @@ def login(host, SN_host, listPkt):
 		s.close()
 		return sessionID
 
+def progress():
+	print("|||", end = "")
+
 def update_network(host, listPkt):
 	func.warning("\nP2P >> CREATION NETWORK")
 
 	while True:
 		nGroup = input("Inserire il numero del gruppo: ")
 		nElement = input("Inserire il numero dell'elemento del gruppo: ")
+		nPort = input("Inserire il numero della porta: ")
 		Fhost = [("172.030." + func.format_string(nGroup, const.LENGTH_SECTION_IPV4, "0") + 
 					"." + func.format_string(nElement, const.LENGTH_SECTION_IPV4, "0") + 
 					"|fc00:0000:0000:0000:0000:0000:" + func.format_string(nGroup, const.LENGTH_SECTION_IPV6, "0") + 
-					":" + func.format_string(nElement, const.LENGTH_SECTION_IPV6, "0")), const.PORT]
+					":" + func.format_string(nElement, const.LENGTH_SECTION_IPV6, "0")), nPort]
 
 
 		if SN:
@@ -47,10 +52,11 @@ def update_network(host, listPkt):
 
 	# Caricamento
 	print("Loading...")
+	
+	##### Da fare
 
-	for i in range(0, int(const.MAX_TIME / 1000)):
-		time.sleep(1)
-		print("|||", end = "")
+	#for i in range(0, int(const.MAX_TIME / 1000)):
+		#threading.Timer(1, progress()).start()
 
 	if SN:
 		func.success("NETWORK CREATED:")
@@ -277,7 +283,7 @@ else:
 
 SN_host = update_network(host, listPkt)
 
-func.gtext("SN HOST: " + str(SN_host[0], "ascii"))
+func.gtext("SN HOST: " + SN_host[0])
 
 ####### LOGIN AUTOMATICO PEER
 

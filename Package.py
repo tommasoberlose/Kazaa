@@ -46,7 +46,7 @@ def request_remove_file(sessionID, md5):
 	return pack
 
 def request_logout(sessionID):
-	pack = bytes(const.CODE_LOGOUT, "ascii") + bytes(sessionID, "ascii")
+	pack = bytes(const.CODE_LOGOUT, "ascii") + sessionID
 	return pack
 
 def answer_logout(nDelete):
