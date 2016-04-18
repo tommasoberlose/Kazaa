@@ -214,13 +214,13 @@ class Daemon(Thread):
 							func.write_daemon_text(self.name, addr[0], "INIZIO RICERCA DI: " + str(ricevutoByte[82:], "ascii"))
 							pk = pack.query(self.host, ricevutoByte[20:])
 
-							for x in sn_network:
+							for x in self.sn_network:
 								sNet = func.create_socket_client(func.roll_the_dice(x[0]), x[1])
 								if sNet != None:
 									sNet.sendall(pk)
 									sNet.close()
 
-							threading.Timer(const.MAX_TIME/1000, send_afin(conn)).start()	
+							Thread.Timer(const.MAX_TIME/1000, send_afin(conn)).start()	
 					else:
 						func.write_daemon_error(self.name, addr[0], "Ricevuto pacchetto sbagliato: " + str(ricevutoByte, "ascii"))
 			s.close()

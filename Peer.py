@@ -74,6 +74,8 @@ def update_network(host, listPkt):
 
 
 def search(sessionID, query, SN_host, host, listPkt):
+	ricevutoByteRam = b''
+	ricevutoByte = b''
 	pk = pack.request_search(sessionID, query)
 	s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1]);
 	if s is None:

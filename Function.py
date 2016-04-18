@@ -158,12 +158,15 @@ def add_pktid(pktid, list_pkt):
 	return True
 
 def clear_pktid(list_pkt):
+	x = 0
 	for i in list_pkt:
 		pkTime = i[1]
 		nowtime = time.time() * 1000
 		diff = nowtime - pkTime
 		if diff >= const.MAX_TIME:
-			del i
+			del list_pkt[x]
+			x -= 1
+		x += 1
 	return list_pkt
 
 def check_query(pktid, list_pkt):
@@ -181,9 +184,12 @@ def check_sn(pktid, list_pkt):
 	return False
 
 def remove_pktid(pktid, list_pkt):
+	i = 0
 	for lista in list_pkt:
 		if pktid == lista[0]:
-			del lista
+			del list_pkt[i]
+			i -= 1
+		i += 1
 
 
 ###### UPLOAD FILE 

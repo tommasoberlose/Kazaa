@@ -60,7 +60,7 @@ def query(ip, query):
 	pk_id = func.random_pktid(const.LENGTH_PKTID)
 	port = func.format_string(const.PORT, const.LENGTH_PORT, "0")
 	step = func.format_string(const.TTL, const.LENGTH_TTL, "0")
-	query = func.format_string(query, const.LENGTH_QUERY, " ")
+	query = func.format_string(str(query, "ascii"), const.LENGTH_QUERY, " ")
 	pack = bytes(const.CODE_QUERY, "ascii") + bytes(pk_id, "ascii") + bytes(ip, "ascii") + bytes(port, "ascii") + bytes(step, "ascii") + bytes(query, "ascii")
 	return pack
 
@@ -82,7 +82,7 @@ def answer_query(pktID, ip, md5, fileName):
 # PKT SEARCH PEER al SN
 def request_search(sessionID, query):
 	query = func.format_string(query, const.LENGTH_QUERY, " ")
-	pack = bytes(const.CODE_SEARCH, "ascii") + bytes(sessionID, "ascii") + bytes(query, "ascii")
+	pack = bytes(const.CODE_SEARCH, "ascii") + sessionID + bytes(query, "ascii")
 	return pack
 
 """ DA FARE 
