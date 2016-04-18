@@ -143,17 +143,24 @@ class Daemon(Thread):
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_REMOVEFILE:
 						if self.SN:
 							if func.isUserLogged(ricevutoByte[4:20], self.listUsers):
+								findFile = False
+								i = 0
 								for file in self.listFiles:
+									print(file)
 									if (ricevutoByte[4:20] == file[2]) and (ricevutoByte[20:] == file[0]):
-										del file
+										findFile = True
+										del self.listFiles[i]
 										func.write_daemon_success(self.name, addr[0], "REMOVE FILE: " + str(ricevutoByte[20:], "ascii").strip())
-									else:
-										func.write_daemon_error(self.name, addr[0], "REMOVE FILE - File not exists")
+										i -= 1
+									i += 1
+								if not findFile:
+									func.write_daemon_error(self.name, addr[0], "REMOVE FILE - File not exists")
 							else:
 								func.write_daemon_error(self.name, addr[0], "REMOVE FILE - User not logged")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_LOGOUT: ### LOGOUT
 						if self.SN:
+							i = 0
 							for user in self.listUsers:
 								if ricevutoByte[4:] == user[2]:
 									del user
@@ -161,8 +168,10 @@ class Daemon(Thread):
 							nDelete = 0
 							for file in self.listFiles:
 								if ricevutoByte[4:] == file[2]:
-									del file
+									del self.listFiles[i]
 									nDelete += 1
+									i -= 1
+								i += 1
 
 							pk = pack.answer_logout(nDelete)
 							conn.sendall(pk)

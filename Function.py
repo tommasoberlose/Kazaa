@@ -287,8 +287,9 @@ def choose_SN(sn_network):
 def countUserFile(sessionID, listFiles):
 	i = 0
 	for f in listFiles:
-		if f[2] is sessionID:
+		if f[2] == sessionID:
 			i += 1
+	return i
 
 def isUserLogged(sessionID, listUsers):
 	for user in listUsers:

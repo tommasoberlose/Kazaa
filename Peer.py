@@ -172,7 +172,7 @@ def logout(ip, sessionID, SN_host):
 		s.sendall(pk)
 		ricevutoByte = s.recv(const.LENGTH_PACK)
 		nDelete = ricevutoByte[4:]
-		func.success("Logout eseguito con successo dal super nodo, eliminati " + str(nDelete, "ascii") + "elementi")
+		func.success("Logout eseguito con successo dal super nodo, eliminati " + str(nDelete, "ascii") + " elementi")
 		s.close()
 
 	pk = pack.close()
@@ -319,13 +319,13 @@ if sessionID is not const.ERROR_LOG:
 			func.warning("\n>>> USER LIST")
 			print ("USER IP\t\t\tSESSIONID")
 			for user in listUsers:
-				print(user[0] + " " + user[1] + "\t" + user[2] + "\t" + func.countUserFile(user[2], listFiles))
+				print(str(user[0], "ascii") + " " + str(user[1], "ascii") + "\t" + str(user[2], "ascii") + "\t" + str(func.countUserFile(user[2], listFiles)))
 
 		elif (choice == "file" or choice == "f"):
 			func.warning("\n>>> FILES LIST")
 			print ("MD5\tFILENAME\tSESSIONID")
 			for file in listFiles:
-				print(file[0] + "\t" + file[1].strip() + "\t" + file[2])
+				print(str(file[0], "ascii") + "\t" + str(file[1].strip(), "ascii") + "\t" + str(file[2], "ascii"))
 
 		elif (choice == "search" or choice == "s"):
 			func.warning("\n>>> SEARCH")
