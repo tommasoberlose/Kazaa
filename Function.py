@@ -320,6 +320,7 @@ def check_file(listFiles, ricevutoByte):
 
 def send_afin(conn, listResultQuery):
 	print(listResultQuery)
+	print(len(listResultQuery))
 	if len(listResultQuery) != 0:
 		listaMd5 = []
 
@@ -348,8 +349,8 @@ def send_afin(conn, listResultQuery):
 	else:
 		pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes("0" * const.LENGTH_NIDMD5, "ascii")  
 
+	print(pk)
 	conn.sendall(pk)
-	conn.close()
 
 
 

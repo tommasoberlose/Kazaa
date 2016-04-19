@@ -86,6 +86,8 @@ def search(sessionID, query, SN_host, host, listPkt):
 		while len(ricevutoByteRam) < const.LENGTH_PACK:
 			ricevutoByteRam = s.recv(const.LENGTH_PACK)
 			ricevutoByte = ricevutoByte + ricevutoByteRam
+			if str(ricevutoByteRam[4:7], "ascii") == const.LENGTH_NIDMD5 * "0":
+				break
 
 		if str(ricevutoByte[0:4],"ascii") == const.CODE_ANSWER_SEARCH:
 			nIdmd5 = int(ricevutoByte[4:7])

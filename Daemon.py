@@ -131,7 +131,7 @@ class Daemon(Thread):
 								self.listUsers.append(user)
 								func.write_daemon_success(self.name, addr[0], "LOGIN OK")
 							else: func.write_daemon_success(self.name, addr[0], "RECONNECT OK")
-							print(self.listUsers)
+							#print(self.listUsers)
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ADDFILE:
 						if self.SN:
@@ -227,8 +227,9 @@ class Daemon(Thread):
 									sNet.sendall(pk)
 									sNet.close()
 
-							t = Timer(int(const.MAX_TIME / 1000), func.send_afin(conn, self.listResultQuery))
-							t.start()	
+							func.send_afin(conn, self.listResultQuery)
+							#t = Timer(int(const.MAX_TIME / 1000), func.send_afin(conn, self.listResultQuery))
+							#t.start()	
 					else:
 						func.write_daemon_error(self.name, addr[0], "Ricevuto pacchetto sbagliato: " + str(ricevutoByte, "ascii"))
 			s.close()

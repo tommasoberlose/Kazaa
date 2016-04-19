@@ -11,7 +11,7 @@ def request_sn(ip, port):
 	return pack
 
 def answer_sn(pk_id, ip):
-	port = func.format_string(const.PORT, const.LENGTH_PORT, "0")
+	port = func.format_string(const.PORT_SN, const.LENGTH_PORT, "0")
 	pack = bytes(const.CODE_ANSWER_SN, "ascii") + pk_id + bytes(ip, "ascii") + bytes(port, "ascii")
 	return pack
 
