@@ -19,6 +19,11 @@ def format_string(text, length, char):
 	dif = length - l
 	return char * dif + text 
 
+def reverse_format_string(text, length, char):
+	l = len(text)
+	dif = length - l
+	return text + char * dif
+
 def reformat_string(text):
 	return text.strip()
 
@@ -127,33 +132,22 @@ def get_ipv6(ip):
 
 ###### SEARCH FILE
 
-#funzione di ricerca file all'interno della cartella FileCondivisi
-def search_file(query): # Da modificare, la ricerca va fatta sui file miei ma anche dei miei peer
-	file_list = []
-	file_found_list = []
-	file_list = os.listdir(const.FILE_COND)
-	check = 0
-	for file in file_list:
-		# Ricerca match nel nome
-		if file.lower().find(query.lower()) == 0:
-			if not file.endswith('~'):
-				check = 1
-				md5File = hashlib.md5(open(const.FILE_COND + file,'rb').read()).hexdigest()
-				file_found = [md5File, file]
-				file_found_list.append(file_found)
-	#if check == 0:
-		#func.error("File not exists")
+def search_file(query, listResultQuery, listFiles, listUsers): 
+	for f in listFiles:
+		if query in f[1]:
+			for i in listUsers:
+				if i[2] == f[2]:
+					listResultQuery.append([f[0], bytes(func.format_string(str(f[1],"ascii"), const.LENGTH_FILENAME, " "),"ascii"), i[0], i[1]])
+					break
 
-	#print(file_found_list)
-	return file_found_list
 
-def add_pktid(pktid, list_pkt):
+def add_pktid(pktid, list_pkt, port):
 	list_pkt = clear_pktid(list_pkt)
 	for lista in list_pkt:
-		if pktid == lista[0]:
+		if (pktid == lista[0]) and (port == lista[2]):
 			return False
 	pkTime = time.time() * 1000
-	add_list = [pktid, pkTime]
+	add_list = [pktid, pkTime, port]
 	list_pkt.append(add_list)
 	return True
 
@@ -169,10 +163,10 @@ def clear_pktid(list_pkt):
 		x += 1
 	return list_pkt
 
-def check_query(pktid, list_pkt):
+def check_query(pktid, list_pkt, port):
 	list_pkt = clear_pktid(list_pkt)
 	for lista in list_pkt:
-		if pktid == lista[0]:
+		if (pktid == lista[0]) and (port == lista[2]):
 			return True
 	return False
 
@@ -246,7 +240,7 @@ def download(selectFile):
 	if sP is None:
 	    print ('Error: could not open socket in download')
 	else:
-		pk = pack.dl(md5)
+		pk = pack.request_download(md5)
 		sP.sendall(pk)
 
 		nChunk = int(sP.recv(const.LENGTH_HEADER)[4:10])
@@ -319,37 +313,37 @@ def check_file(listFiles, ricevutoByte):
 	return True
 
 def send_afin(conn, listResultQuery):
-	print(listResultQuery)
-	print(len(listResultQuery))
 	if len(listResultQuery) != 0:
-		listaMd5 = []
+		nMd5 = 0
 
-		while len(listResultQuery) != 0:
-			listaCopie = []
-			listaCopie = listResultQuery[0][1:]
-			listaMd5.append(listaCopie)
-			md5 = listResultQuery[0][1]
-			del listResultQuery[0]
-			
-			count = 0
-			for i in listResultQuery:
-				if md5 == i[1]:
-					listaMd5.append(i[1:])
-					del listaMd5[count]
-					count -= 1
-				count += 1
+		listResultQuery.sort()
 
-		pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes(func.format_string(len(listaMd5), const.LENGTH_NIDMD5, "0"), "ascii")
+		md5 = b''
+		for x in listResultQuery:
+			if md5 != x[0]:
+				md5 = x[0]
+				nMd5 += 1
 
-		for i in listaMd5:
-			pk = pk + bytes(i[0][0], "ascii") + bytes(i[0][1], "ascii") + bytes(func.format_string(len(i), const.LENGTH_NCOPY, "0"), "ascii")
-			for j in i:
-				pk = pk + bytes(j[2:], "ascii") 
+		
+		pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes(func.format_string(str(nMd5), const.LENGTH_NIDMD5, "0"), "ascii")
+
+		actualMd5 = b''
+
+		for i in listResultQuery:
+			if i[0] != actualMd5:
+				actualMd5 = listResultQuery[0][0]
+				# calcolo numero copie
+				copy = 0
+				for x in listResultQuery:
+					if x[0] == actualMd5:
+						copy += 1
+				pk = pk + i[0] + i[1] + bytes(func.format_string(str(copy), const.LENGTH_NCOPY, "0"), "ascii")
+			pk = pk + i[2] + i[3] 
+
 
 	else:
 		pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes("0" * const.LENGTH_NIDMD5, "ascii")  
 
-	print(pk)
 	conn.sendall(pk)
 
 

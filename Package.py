@@ -85,12 +85,6 @@ def request_search(sessionID, query):
 	pack = bytes(const.CODE_SEARCH, "ascii") + sessionID + bytes(query, "ascii")
 	return pack
 
-""" DA FARE 
-def answer_search():
-	pack = bytes(const.CODE_ANSWER_SEARCH, "ascii") 
-	return pack
-"""
-
 def modify_ttl(step):
 	step = int(step)
 	step = step - 1
@@ -102,9 +96,3 @@ def close():
 def request_download(md5):
 	pack = bytes(const.CODE_DOWNLOAD, "ascii") + md5
 	return pack
-
-""" DA FARE
-def answer_download(md5):
-	pack = bytes(const.CODE_DOWNLOAD, "ascii") + md5
-	return pack
-"""

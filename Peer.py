@@ -7,12 +7,12 @@ import sys
 import time
 import hashlib
 
-def login(host, SN_host, listPkt):
+def login(host, SN, SN_host, listPkt):
 	s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1])
 	pk = pack.request_login(host)
 	if s is None:
 		func.error("Errore nell'apertura della socket per il login")
-		update_network(host, listPkt)
+		update_network(host, SN, listPkt)
 	else:
 		s.sendall(pk)
 		ricevutoByte = s.recv(const.LENGTH_PACK)
@@ -23,7 +23,7 @@ def login(host, SN_host, listPkt):
 def progress():
 	print("|||", end = "")
 
-def update_network(host, listPkt):
+def update_network(host, SN, listPkt):
 	func.warning("\nP2P >> CREATION NETWORK")
 
 	while True:
@@ -38,10 +38,11 @@ def update_network(host, listPkt):
 
 		if SN:
 			pk = pack.request_sn(host, const.PORT_SN)
+			func.add_pktid(pk[4:20], listPkt, const.PORT_SN)
 		else:
 			pk = pack.request_sn(host, const.PORT)
+			func.add_pktid(pk[4:20], listPkt, const.PORT)
 
-		func.add_pktid(pk[4:20], listPkt)
 		s = func.create_socket_client(func.roll_the_dice(Fhost[0]), Fhost[1]);
 		if s is None:
 			func.error("Errore nella scelta del primo nodo vicino, scegline un altro.")
@@ -73,23 +74,21 @@ def update_network(host, listPkt):
 	return SN_host
 
 
-def search(sessionID, query, SN_host, host, listPkt):
+def search(sessionID, query, SN, SN_host, host, listPkt):
 	ricevutoByteRam = b''
 	ricevutoByte = b''
 	pk = pack.request_search(sessionID, query)
 	s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1]);
 	if s is None:
 		func.error("Super nodo non attivo.")
-		update_network(host, listPkt)
+		update_network(host, SN, listPkt)
 	else:
 		s.sendall(pk)
-		while len(ricevutoByteRam) < const.LENGTH_PACK:
-			ricevutoByteRam = s.recv(const.LENGTH_PACK)
-			ricevutoByte = ricevutoByte + ricevutoByteRam
-			if str(ricevutoByteRam[4:7], "ascii") == const.LENGTH_NIDMD5 * "0":
-				break
+
+		ricevutoByte = s.recv(4 * const.LENGTH_PACK)
 
 		if str(ricevutoByte[0:4],"ascii") == const.CODE_ANSWER_SEARCH:
+			print(ricevutoByte)
 			nIdmd5 = int(ricevutoByte[4:7])
 			if(nIdmd5 != 0):
 				func.success("Ricerca completata.")
@@ -116,7 +115,7 @@ def search(sessionID, query, SN_host, host, listPkt):
 				lastFileName = b''
 				for row in listFile:
 					if lastFileName != row[2]:
-						nomeFile = func.format_string((str(row[2], "ascii").strip() + ":"), LENGTH_FORMAT, " ")
+						nomeFile = func.reverse_format_string((str(row[2], "ascii").strip() + ":"), const.LENGTH_FORMAT, " ")
 						print(nomeFile + str(row[0]) + "\t" + str(row[3], "ascii"))
 					else:
 						print("\t\t\t" + str(row[0]) + "\t" + str(row[3], "ascii"))
@@ -137,14 +136,14 @@ def search(sessionID, query, SN_host, host, listPkt):
 		s.close()
 
 # Funzione di aggiunta file
-def add_file(fileName, sessionID, SN_host, host, listPkt):
+def add_file(fileName, sessionID, SN, SN_host, host, listPkt):
 	if os.path.exists("FileCondivisi/" + fileName):
 		md5File = hashlib.md5(open(("FileCondivisi/" + fileName),'rb').read()).hexdigest()
 		pk = pack.request_add_file(sessionID, md5File, func.format_string(fileName, const.LENGTH_FILENAME, " "))
 		s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1]);
 		if s is None:
 			func.error("Errore, super nodo non attivo.")
-			update_network(host, listPkt)
+			update_network(host, SN, listPkt)
 		else:
 			s.sendall(pk)
 			s.close()
@@ -152,13 +151,14 @@ def add_file(fileName, sessionID, SN_host, host, listPkt):
 		func.error("Errore: file non esistente.")
 
 # Funzione di rimozione del file
-def remove_file(fileName, sessionID, SN_host, host, listPkt):
+def remove_file(fileName, sessionID, SN, SN_host, host, listPkt):
 	if os.path.exists("FileCondivisi/" + fileName):
 		md5File = hashlib.md5(open(("FileCondivisi/" + fileName),'rb').read()).hexdigest()
 		pk = pack.request_remove_file(sessionID, md5File)
 		s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1]);
 		if s is None:
 			func.error("Errore, super nodo non attivo.")
+			update_network(host, SN, listPkt)
 		else:
 			s.sendall(pk)
 			s.close()
@@ -166,7 +166,7 @@ def remove_file(fileName, sessionID, SN_host, host, listPkt):
 		func.error("Errore: file non esistente.")
 	
 
-def logout(ip, sessionID, SN_host):
+def logout(ip, sessionID, SN, SN_host):
 	print ("\n>>> LOGOUT")
 	pk = pack.request_logout(sessionID)
 	s = func.create_socket_client(func.roll_the_dice(SN_host[0]), SN_host[1]);
@@ -188,6 +188,15 @@ def logout(ip, sessionID, SN_host):
 		s.close()
 		print ("Chiusura del programma eseguito con successo, arrivederci.\n\n")
 
+	if SN:
+		s = func.create_socket_client(func.roll_the_dice(ip), const.PORT_SN);
+		if s is None:
+			func.error("Errore nella chiusura del demone super nodo")
+		else:
+			s.sendall(pk)
+			s.close()
+			print ("Chiusura del programma eseguito con successo, arrivederci.\n\n")
+
 
 
 ####### VARIABILI 
@@ -196,7 +205,7 @@ SN = False
 sessionID = ""
 
 sn_network = []
-listPkt = [] # [pktid, time]
+listPkt = [] # [pktid, time, port]
 listUsers = [] # [ip, port, sessionID]
 listFiles = [] # [md5, fileName, sessionID]
 
@@ -272,22 +281,22 @@ func.gtext("IP: " + host)
 ####### DEMONI
 
 if SN:
-	daemonThread = daemon.Daemon(host, True, sn_network, listPkt, listUsers, listFiles, True)
-	daemonThread.setName("DAEMON SN")
-	daemonThread.start()
+	daemonThreadSN = daemon.Daemon(host, True, sn_network, listPkt, listUsers, listFiles, True)
+	daemonThreadSN.setName("DAEMON SN")
+	daemonThreadSN.start()
 
-	daemonThread = daemon.Daemon(host, True, sn_network, listPkt, listUsers, listFiles, False)
-	daemonThread.setName("DAEMON PEER")
-	daemonThread.start()
+	daemonThreadP = daemon.Daemon(host, True, sn_network, listPkt, listUsers, listFiles, False)
+	daemonThreadP.setName("DAEMON PEER")
+	daemonThreadP.start()
 
 else:
-	daemonThread = daemon.Daemon(host, False, sn_network, listPkt, listUsers, listFiles, False)
-	daemonThread.setName("DAEMON PEER")
-	daemonThread.start()	
+	daemonThreadP = daemon.Daemon(host, False, sn_network, listPkt, listUsers, listFiles, False)
+	daemonThreadP.setName("DAEMON PEER")
+	daemonThreadP.start()	
 
 ####### INIZIALIZZAZIONE NETWORK
 
-SN_host = update_network(host, listPkt)
+SN_host = update_network(host, SN, listPkt)
 
 func.gtext("SN HOST: " + SN_host[0])
 
@@ -295,7 +304,7 @@ func.gtext("SN HOST: " + SN_host[0])
 
 func.warning("\nP2P >> PEER LOGIN")
 print(SN_host)
-sessionID = login(host, SN_host, listPkt)
+sessionID = login(host, SN, SN_host, listPkt)
 if sessionID is not const.ERROR_LOG:
 	func.success("Session ID: " + str(sessionID, "ascii"))
 
@@ -311,13 +320,13 @@ if sessionID is not const.ERROR_LOG:
 			func.warning("\n>>> ADD FILE")
 			fileName = input("Quale file vuoi inserire?\n")
 			if fileName is not "0":
-				add_file(fileName, sessionID, SN_host, host, listPkt)
+				add_file(fileName, sessionID, SN, SN_host, host, listPkt)
 
 		elif (choice == "remove" or choice == "r"):
 			func.warning("\n>>> REMOVE FILE")
 			fileName = input("Quale file vuoi rimuovere?\n")
 			if fileName is not "0":
-				remove_file(fileName, sessionID, SN_host, host, listPkt)
+				remove_file(fileName, sessionID, SN, SN_host, host, listPkt)
 
 		elif (choice == "user" or choice == "u"):
 			func.warning("\n>>> USER LIST")
@@ -337,11 +346,13 @@ if sessionID is not const.ERROR_LOG:
 			while(len(query) > const.LENGTH_QUERY):
 				func.error("Siamo spiacenti ma accettiamo massimo 20 caratteri.")
 				query = input("\nInserisci il nome del file da cercare: ")
-			search(sessionID, query, SN_host, host, listPkt)
+			search(sessionID, query, SN, SN_host, host, listPkt)
 
 		elif (choice == "quit" or choice == "q"):
-			logout(host, sessionID, SN_host)
-			daemonThread.join()
+			logout(host, sessionID, SN, SN_host)
+			if SN:
+				daemonThreadSN.join()
+			daemonThreadP.join()
 			break
 
 		else:
