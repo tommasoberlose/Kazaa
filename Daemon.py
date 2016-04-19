@@ -1,10 +1,12 @@
-from threading import Thread
+#from threading import Thread
 import time
 import sys
 import socket
 import Constant as const
 import Function as func
 import Package as pack
+from threading import * 
+#from Thread import Timer 
 
 class Daemon(Thread):
 
@@ -26,7 +28,7 @@ class Daemon(Thread):
 		self.listFiles = listFiles
 		self.listResultQuery = []
 
-	def send_afin(conn):
+	"""def send_afin(conn):
 		if len(self.listResultQuery) != 0:
 			listaMd5 = []
 
@@ -53,7 +55,7 @@ class Daemon(Thread):
 			pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes("0" * const.LENGTH_NIDMD5, "ascii")  
 
 		conn.sendall(pk)
-		conn.close()
+		conn.close()"""
 
 
 	def run(self):
@@ -194,7 +196,7 @@ class Daemon(Thread):
 							if len(listFileFounded) != 0:
 								for x in listFileFounded:
 									pk = pack.answer_query(ricevutoByte[4:20], self.host, x[0], x[1])
-									sC = func.create_socket_client(func.roll_the_dice(str(ricevutoByte[20:75], "ascii"), ricevutoByte[75:80]))
+									sC = func.create_socket_client(func.roll_the_dice(str(ricevutoByte[20:75], "ascii")), ricevutoByte[75:80])
 									if sC != None:
 										sC.sendall(pk)
 										sC.close()
@@ -218,13 +220,15 @@ class Daemon(Thread):
 							func.write_daemon_text(self.name, addr[0], "INIZIO RICERCA DI: " + str(ricevutoByte[82:], "ascii"))
 							pk = pack.query(self.host, ricevutoByte[20:])
 
+							print(self.sn_network)
 							for x in self.sn_network:
 								sNet = func.create_socket_client(func.roll_the_dice(x[0]), x[1])
 								if sNet != None:
 									sNet.sendall(pk)
 									sNet.close()
 
-							Thread.Timer(const.MAX_TIME/1000, send_afin(conn)).start()	
+							t = Timer(int(const.MAX_TIME / 1000), func.send_afin(conn, self.listResultQuery))
+							t.start()	
 					else:
 						func.write_daemon_error(self.name, addr[0], "Ricevuto pacchetto sbagliato: " + str(ricevutoByte, "ascii"))
 			s.close()

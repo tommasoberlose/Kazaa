@@ -318,6 +318,39 @@ def check_file(listFiles, ricevutoByte):
 			return False
 	return True
 
+def send_afin(conn, listResultQuery):
+	print(listResultQuery)
+	if len(listResultQuery) != 0:
+		listaMd5 = []
+
+		while len(listResultQuery) != 0:
+			listaCopie = []
+			listaCopie = listResultQuery[0][1:]
+			listaMd5.append(listaCopie)
+			md5 = listResultQuery[0][1]
+			del listResultQuery[0]
+			
+			count = 0
+			for i in listResultQuery:
+				if md5 == i[1]:
+					listaMd5.append(i[1:])
+					del listaMd5[count]
+					count -= 1
+				count += 1
+
+		pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes(func.format_string(len(listaMd5), const.LENGTH_NIDMD5, "0"), "ascii")
+
+		for i in listaMd5:
+			pk = pk + bytes(i[0][0], "ascii") + bytes(i[0][1], "ascii") + bytes(func.format_string(len(i), const.LENGTH_NCOPY, "0"), "ascii")
+			for j in i:
+				pk = pk + bytes(j[2:], "ascii") 
+
+	else:
+		pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes("0" * const.LENGTH_NIDMD5, "ascii")  
+
+	conn.sendall(pk)
+	conn.close()
+
 
 
 
