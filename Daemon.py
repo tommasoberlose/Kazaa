@@ -85,6 +85,10 @@ class Daemon(Thread):
 
 							# RESPONSE
 							if self.SN:
+								# Aggiunta supernodi (collaterale)
+								if str(ricevutoByte[75:80], "ascii") == (func.format_string(const.PORT_SN, 5, "0")):
+									if not [str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")] in self.sn_network: 
+										self.sn_network.append([str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")])
 								pk = pack.answer_sn(ricevutoByte[4:20], self.host)
 								sR = func.create_socket_client(func.roll_the_dice(ricevutoByte[20:75]), ricevutoByte[75:80])
 								if sR != None:
