@@ -132,7 +132,8 @@ def get_ipv6(ip):
 
 ###### SEARCH FILE
 
-def search_file(query, listResultQuery, listFiles, listUsers): 
+def search_file(query, listFiles, listUsers): 
+	listResultQuery = []
 	for f in listFiles:
 		if query in f[1]:
 			for i in listUsers:
