@@ -186,7 +186,7 @@ def logout(ip, sessionID, SN, SN_host):
 	else:
 		s.sendall(pk)
 		s.close()
-		print ("Chiusura del programma eseguito con successo, arrivederci.\n\n")
+		print ("Chiusura del peer eseguito con successo, arrivederci.\n\n")
 
 	if SN:
 		s = func.create_socket_client(func.roll_the_dice(ip), const.PORT_SN);
@@ -195,7 +195,7 @@ def logout(ip, sessionID, SN, SN_host):
 		else:
 			s.sendall(pk)
 			s.close()
-			print ("Chiusura del programma eseguito con successo, arrivederci.\n\n")
+			print ("Chiusura del supernodo eseguita con successo, arrivederci.\n\n")
 
 
 
