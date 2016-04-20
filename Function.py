@@ -139,12 +139,13 @@ def search_file(query, listResultQuery, listFiles, listUsers):
 				if i[2] == f[2]:
 					listResultQuery.append([f[0], bytes(func.format_string(str(f[1],"ascii"), const.LENGTH_FILENAME, " "),"ascii"), i[0], i[1]])
 					break
+	return listResultQuery
 
 
 def add_pktid(pktid, list_pkt, port):
 	list_pkt = clear_pktid(list_pkt)
 	for lista in list_pkt:
-		if (pktid == lista[0]) and (port == lista[2]):
+		if (pktid == lista[0]):# and (port == lista[2]):
 			return False
 	pkTime = time.time() * 1000
 	add_list = [pktid, pkTime, port]
@@ -166,7 +167,7 @@ def clear_pktid(list_pkt):
 def check_query(pktid, list_pkt, port):
 	list_pkt = clear_pktid(list_pkt)
 	for lista in list_pkt:
-		if (pktid == lista[0]) and (port == lista[2]):
+		if (pktid == lista[0]):# and (port == lista[2]):
 			return True
 	return False
 

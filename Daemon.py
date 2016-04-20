@@ -10,7 +10,9 @@ from threading import *
 import time
 #from Thread import Timer 
 
-def sendAfin(conn, listResultQuery):
+listResultQuery = []
+
+def sendAfin(conn):
 	time.sleep(const.MAX_TIME / 1000)
 	func.send_afin(conn, listResultQuery)
 
@@ -32,7 +34,7 @@ class Daemon(Thread):
 		self.listPkt = listPkt
 		self.listUsers = listUsers
 		self.listFiles = listFiles
-		self.listResultQuery = []
+		#self.listResultQuery = []
 
 	def run(self):
 		# Creazione socket
@@ -182,7 +184,7 @@ class Daemon(Thread):
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ANSWER_QUERY: ### RISPOSTA QUERY tra SN
 						if func.check_query(ricevutoByte[4:20], self.listPkt, self.port):
-							self.listResultQuery.append([ricevutoByte[80:112], ricevutoByte[112:], ricevutoByte[20:75], ricevutoByte[75:80]])
+							listResultQuery.append([ricevutoByte[80:112], ricevutoByte[112:], ricevutoByte[20:75], ricevutoByte[75:80]])
 						else: 
 							func.write_daemon_error(self.name, addr[0], "ANSWER QUERY - Ricerca conclusa")
 					
@@ -204,11 +206,14 @@ class Daemon(Thread):
 									sNet.sendall(pk)
 									sNet.close()
 
-							func.search_file(bytes(str(ricevutoByte[20:],"ascii").strip(),"ascii"), self.listResultQuery, self.listFiles, self.listUsers)
+							listaRisultatiDellaQuery = []
+							listaRisultatiDellaQuery = func.search_file(bytes(str(ricevutoByte[20:],"ascii").strip(),"ascii"), self.listFiles, self.listUsers)
+							listResultQuery.append(listaRisultatiDellaQuery)
+
 
 							#func.send_afin(conn, self.listResultQuery)
 
-							daemonAfin = threading.Thread(target=sendAfin, args=(conn,self.listResultQuery, ))
+							daemonAfin = threading.Thread(target=sendAfin, args=(conn, ))
 							daemonAfin.start()
 
 							#t = Timer(int(const.MAX_TIME / 1000), func.send_afin, (conn, self.listResultQuery))
