@@ -1,4 +1,5 @@
 #from threading import Thread
+import threading
 import time
 import sys
 import socket
@@ -6,7 +7,12 @@ import Constant as const
 import Function as func
 import Package as pack
 from threading import * 
+import time
 #from Thread import Timer 
+
+def sendAfin(conn, listResultQuery):
+	time.sleep(const.MAX_TIME / 1000)
+	func.send_afin(conn, listResultQuery)
 
 class Daemon(Thread):
 
@@ -200,7 +206,11 @@ class Daemon(Thread):
 
 							func.search_file(ricevutoByte[82:], self.listResultQuery, self.listFiles, self.listUsers)
 
-							func.send_afin(conn, self.listResultQuery)
+							#func.send_afin(conn, self.listResultQuery)
+
+							daemonAfin = threading.Thread(target=sendAfin, args=(conn,self.listResultQuery, ))
+							daemonAfin.start()
+
 							#t = Timer(int(const.MAX_TIME / 1000), func.send_afin, (conn, self.listResultQuery))
 					else:
 						func.write_daemon_error(self.name, addr[0], "Ricevuto pacchetto sbagliato: " + str(ricevutoByte, "ascii"))
