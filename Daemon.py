@@ -171,7 +171,7 @@ class Daemon(Thread):
 
 							# Rispondi
 							listFileFounded = []
-							func.search_file(bytes(func.reformat_string(str(ricevutoByte[82:],"ascii")),"ascii"), listFileFounded, self.listFiles, self.listUsers) # Da controllare
+							listFileFounded = func.search_file(bytes(func.reformat_string(str(ricevutoByte[82:],"ascii")),"ascii"), self.listFiles, self.listUsers) # Da controllare
 							if len(listFileFounded) != 0:
 								for x in listFileFounded:
 									pk = pack.answer_query(ricevutoByte[4:20], self.host, str(x[0], "ascii"), str(x[1], "ascii"))
