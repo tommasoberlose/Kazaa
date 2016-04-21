@@ -66,9 +66,9 @@ class Daemon(Thread):
 							# RESPONSE
 							if self.SN:
 								# Aggiunta supernodi (collaterale)
-								if str(ricevutoByte[75:80], "ascii") == (func.format_string(const.PORT_SN, 5, "0")):
-									if not [str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")] in self.sn_network: 
-										self.sn_network.append([str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")])
+								#if str(ricevutoByte[75:80], "ascii") == (func.format_string(const.PORT_SN, 5, "0")):
+								#	if not [str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")] in self.sn_network: 
+								#		self.sn_network.append([str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")])
 								pk = pack.answer_sn(ricevutoByte[4:20], self.host)
 								sR = func.create_socket_client(func.roll_the_dice(ricevutoByte[20:75]), ricevutoByte[75:80])
 								if sR != None:
@@ -113,8 +113,6 @@ class Daemon(Thread):
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ADDFILE:
 						if self.SN:
-							print(ricevutoByte[4:20])
-							print(self.listUsers)
 							if func.isUserLogged(ricevutoByte[4:20], self.listUsers):
 								if(func.check_file(self.listFiles, ricevutoByte)):
 									self.listFiles.insert(0, [ricevutoByte[20:52], ricevutoByte[52:152], ricevutoByte[4:20]])
@@ -130,7 +128,6 @@ class Daemon(Thread):
 								findFile = False
 								i = 0
 								for file in self.listFiles:
-									print(file)
 									if (ricevutoByte[4:20] == file[2]) and (ricevutoByte[20:] == file[0]):
 										findFile = True
 										del self.listFiles[i]
