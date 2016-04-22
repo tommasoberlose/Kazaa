@@ -66,7 +66,7 @@ def query(ip, query):
 
 def forward_query(pack):
 	step = modify_ttl(pack[80:82])
-	if step != 0:
+	if step > 0:
 		step = func.format_string(str(step), const.LENGTH_TTL, "0")
 		pack = pack[0:80] + bytes(step, "ascii") + pack[82:]
 		return pack
@@ -74,10 +74,10 @@ def forward_query(pack):
 		return bytes(const.ERROR_PKT, "ascii")
 
 
-def answer_query(pktID, ip, md5, fileName):
-	port = func.format_string(const.PORT, const.LENGTH_PORT, "0")
+def answer_query(pktID, ip, port, md5, fileName):
+	#port = func.format_string(const.PORT, const.LENGTH_PORT, "0")
 	fileName = func.format_string(fileName, const.LENGTH_FILENAME, " ")
-	return bytes(const.CODE_ANSWER_QUERY, "ascii") + pktID + bytes(ip, "ascii") + bytes(port, "ascii") + bytes(md5, "ascii") + bytes(fileName, "ascii")
+	return bytes(const.CODE_ANSWER_QUERY, "ascii") + pktID + ip + port + bytes(md5, "ascii") + bytes(fileName, "ascii")
 
 # PKT SEARCH PEER al SN
 def request_search(sessionID, query):

@@ -116,6 +116,7 @@ def forward(pk, addr, l): # Non andrebbe fatto generico?
 				s = func.create_socket_client(func.roll_the_dice(x[0]), x[1])
 				if not(s is None):
 					s.sendall(pk)
+					#write_daemon_success("Forward da " + addr + " a " + x[0])
 					s.close()
 
 ###### IP
