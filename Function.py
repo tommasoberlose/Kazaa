@@ -116,7 +116,7 @@ def forward(pk, addr, l): # Non andrebbe fatto generico?
 				s = func.create_socket_client(func.roll_the_dice(x[0]), x[1])
 				if not(s is None):
 					s.sendall(pk)
-					write_daemon_success("Daemon", "-", "Forward da " + addr + " a " + x[0])
+					#write_daemon_success("Daemon", "-", "Forward da " + addr + " a " + x[0])
 					s.close()
 
 ###### IP
@@ -331,8 +331,6 @@ def send_afin(conn, listResultQuery):
 		pk = bytes(const.CODE_ANSWER_SEARCH, "ascii") + bytes(func.format_string(str(nMd5), const.LENGTH_NIDMD5, "0"), "ascii")
 
 		actualMd5 = b''
-
-		print(listResultQuery)
 
 		for i in listResultQuery:
 			if i[0] != actualMd5:
