@@ -75,8 +75,8 @@ class Daemon(Thread):
 								if sR != None:
 									sR.sendall(pk)
 									sR.close()
-						else:
-							func.write_daemon_error(self.name, addr[0], "Pacchetto già ricevuto")
+						#else:
+						#	func.write_daemon_error(self.name, addr[0], "Pacchetto già ricevuto")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ANSWER_SN: ### ANSWER SN
 						if self.SN:
@@ -177,8 +177,8 @@ class Daemon(Thread):
 									if sC != None:
 										sC.sendall(pk)
 										sC.close()
-						else:
-							func.write_daemon_error(self.name, addr[0], "Pacchetto già ricevuto")
+						#else:
+						#	func.write_daemon_error(self.name, addr[0], "Pacchetto già ricevuto")
 
 					elif str(ricevutoByte[0:4], "ascii") == const.CODE_ANSWER_QUERY: ### RISPOSTA QUERY tra SN
 						if func.check_query(ricevutoByte[4:20], self.listPkt, self.port):
