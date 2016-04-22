@@ -69,6 +69,7 @@ class Daemon(Thread):
 								if str(ricevutoByte[75:80], "ascii") == (func.format_string(const.PORT_SN, 5, "0")):
 									if not [str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")] in self.sn_network: 
 										self.sn_network.append([str(ricevutoByte[20:75],"ascii"), str(ricevutoByte[75:80],"ascii")])
+										func.write_daemon_success(self.name, addr[0], "SN Network - Added: " + str(ricevutoByte[20:75], "ascii"))
 								pk = pack.answer_sn(ricevutoByte[4:20], self.host)
 								sR = func.create_socket_client(func.roll_the_dice(ricevutoByte[20:75]), ricevutoByte[75:80])
 								if sR != None:
@@ -205,7 +206,8 @@ class Daemon(Thread):
 
 							listaRisultatiDellaQuery = []
 							listaRisultatiDellaQuery = func.search_file(bytes(str(ricevutoByte[20:],"ascii").strip(),"ascii"), self.listFiles, self.listUsers)
-							listResultQuery.append(listaRisultatiDellaQuery)
+							for x in listaRisultatiDellaQuery:
+								listResultQuery.append(x)
 
 
 							#func.send_afin(conn, self.listResultQuery)

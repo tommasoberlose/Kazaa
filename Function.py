@@ -331,6 +331,8 @@ def send_afin(conn, listResultQuery):
 
 		actualMd5 = b''
 
+		print(listResultQuery)
+
 		for i in listResultQuery:
 			if i[0] != actualMd5:
 				actualMd5 = listResultQuery[0][0]
@@ -339,6 +341,7 @@ def send_afin(conn, listResultQuery):
 				for x in listResultQuery:
 					if x[0] == actualMd5:
 						copy += 1
+
 				pk = pk + i[0] + i[1] + bytes(func.format_string(str(copy), const.LENGTH_NCOPY, "0"), "ascii")
 			pk = pk + i[2] + i[3] 
 
