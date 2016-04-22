@@ -1,4 +1,4 @@
-PORT = "3000"
+PORT = "30000"
 PORT_SN = "3000"
 LENGTH_PORT = 5
 
