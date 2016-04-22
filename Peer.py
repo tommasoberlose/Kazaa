@@ -164,6 +164,11 @@ def remove_file(fileName, sessionID, SN, SN_host, host, listPkt):
 			s.close()
 	else:
 		func.error("Errore: file non esistente.")
+
+def list_neighborhood():
+	print("IP      \t\t\t\t\t\tPORT")
+	for i in sn_network:
+		print(i[0] + " " + i[1])
 	
 
 def logout(ip, sessionID, SN, SN_host):
@@ -312,7 +317,7 @@ if sessionID is not const.ERROR_LOG:
 
 	while True:
 		if SN:
-			print ("\n\nScegli azione SN:\nuser\t - View Users\nfile\t - View Files")
+			print ("\n\nScegli azione SN:\nuser\t - View Users\nfile\t - View Files\nview\t - View Neighbor")
 		print ("\n\nScegli azione PEER:\nadd\t - Add File\nremove\t - Remove File\nsearch\t - Search File\nquit\t - Quit\n\n")
 		choice = input()
 
@@ -328,13 +333,13 @@ if sessionID is not const.ERROR_LOG:
 			if fileName is not "0":
 				remove_file(fileName, sessionID, SN, SN_host, host, listPkt)
 
-		elif (choice == "user" or choice == "u"):
+		elif (choice == "user" or choice == "u" and SN):
 			func.warning("\n>>> USER LIST")
 			print ("USER IP\t\t\tSESSIONID")
 			for user in listUsers:
 				print(str(user[0], "ascii") + " " + str(user[1], "ascii") + "\t" + str(user[2], "ascii") + "\t" + str(func.countUserFile(user[2], listFiles)))
 
-		elif (choice == "file" or choice == "f"):
+		elif (choice == "file" or choice == "f" and SN):
 			func.warning("\n>>> FILES LIST")
 			print ("MD5\tFILENAME\tSESSIONID")
 			for file in listFiles:
@@ -347,6 +352,9 @@ if sessionID is not const.ERROR_LOG:
 				func.error("Siamo spiacenti ma accettiamo massimo 20 caratteri.")
 				query = input("\nInserisci il nome del file da cercare: ")
 			search(sessionID, query, SN, SN_host, host, listPkt)
+
+		elif (choice == "view" or choice == "v" and SN):
+			list_neighborhood()
 
 		elif (choice == "quit" or choice == "q"):
 			logout(host, sessionID, SN, SN_host)

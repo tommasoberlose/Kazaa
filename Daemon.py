@@ -194,6 +194,7 @@ class Daemon(Thread):
 
 					elif(str(ricevutoByte[0:4], "ascii") == const.CODE_SEARCH): ### Richiesta di ricerca da un peer
 						if self.SN:
+							del listResultQuery[:]
 							func.write_daemon_text(self.name, addr[0], "INIZIO RICERCA DI: " + str(ricevutoByte[20:], "ascii").strip())
 							pk = pack.query(self.host, ricevutoByte[20:])
 							func.add_pktid(pk[4:20], self.listPkt, self.port)
