@@ -334,14 +334,16 @@ def send_afin(conn, listResultQuery):
 
 		for i in listResultQuery:
 			if i[0] != actualMd5:
-				actualMd5 = listResultQuery[0][0]
+				#actualMd5 = listResultQuery[0][0]
 				# calcolo numero copie
+				actualMd5 = i[0]
 				copy = 0
 				for x in listResultQuery:
 					if x[0] == actualMd5:
 						copy += 1
 
 				pk = pk + i[0] + i[1] + bytes(func.format_string(str(copy), const.LENGTH_NCOPY, "0"), "ascii")
+
 			pk = pk + i[2] + i[3] 
 
 
