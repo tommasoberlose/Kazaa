@@ -109,7 +109,7 @@ def search(sessionID, query, SN, SN_host, host, listPkt):
 						pointer = pointer + 60
 						fixList = [id, md5, nomeFile, ip, port]
 						listFile.append(fixList)
-
+						
 				print("\nScegli file da quelli disponibili (0 per uscire): \n")
 				print("FILE    \t\tID\tIP\n")
 				lastFileName = b''
@@ -119,7 +119,7 @@ def search(sessionID, query, SN, SN_host, host, listPkt):
 						print(nomeFile + str(row[0]) + "\t" + str(row[3], "ascii"))
 					else:
 						print("\t\t\t" + str(row[0]) + "\t" + str(row[3], "ascii"))
-					lastFileName = str(row[2], "ascii")
+					lastFileName = row[2]
 				
 				selectId = input("\nInserire il numero di file che vuoi scaricare (0 per uscire): ")
 				
